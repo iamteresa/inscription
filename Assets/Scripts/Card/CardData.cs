@@ -10,10 +10,11 @@ public class CardData : ScriptableObject
         Beast,
         Undead,
         Machine,
+        Savage,
         Unknown
     }
     [SerializeField] string _cardName;
-    [SerializeField] private CardSpecies _species;
+    [SerializeField] CardSpecies _species;
     [SerializeField] int _attack;
     [SerializeField] int _health;
     [SerializeField] Sprite _cardImage;

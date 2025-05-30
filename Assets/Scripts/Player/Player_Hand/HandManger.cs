@@ -10,8 +10,8 @@ public class HandManager : MonoBehaviour
     [Header("-------- Ä«µå ÇÁ¸®Æé -------------")]
     [SerializeField] GameObject cardPrefab;
 
-    [Header("-------- µ¦ -------------")]                    
-    [SerializeField] List<CardData> drawPile;             
+    [Header("-------- µ¦ -------------")]
+    [SerializeField] List<CardData> drawPile;
 
     [SerializeField] int maxHandSize = 7;
 
@@ -41,5 +41,7 @@ public class HandManager : MonoBehaviour
 
         // µ¦¿¡¼­ Á¦°Å (¼±ÅÃ»çÇ×)
         drawPile.RemoveAt(index);
+
+
     }
-}
+}       

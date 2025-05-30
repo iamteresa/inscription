@@ -22,9 +22,10 @@ public class CardDisplay : MonoBehaviour
     public void UpdateDisplay()
     {
         NameText.text = cardData.CardName;
-        SpeciesText.text = cardData.Species.ToString();
+        SpeciesText.text = cardData.Species.ToString();         
         AttackText.text = cardData.Attack.ToString();
         HealthText.text = cardData.Health.ToString();
-        CardImage.sprite = cardData.CardImage;
+        //CardImage.sprite = cardData.CardImage;
+            
     }
 }
