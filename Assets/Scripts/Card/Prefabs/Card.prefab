@@ -280,6 +280,7 @@ GameObject:
   - component: {fileID: 317348982363328041}
   - component: {fileID: 7141371669160316937}
   - component: {fileID: 2866389606976056128}
+  - component: {fileID: 6490902560125159253}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -366,6 +367,21 @@ MonoBehaviour:
   AttackText: {fileID: 4397765552588362504}
   HealthText: {fileID: 4140512123896262725}
   CardImage: {fileID: 0}
+--- !u!114 &6490902560125159253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7793903509410112710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f0a4d3b846f3d347b2fd4d767bb5591, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverHeight: 120
+  moveSpeed: 10
+  <SideShiftAmount>k__BackingField: 170
 --- !u!1 &8257328336341322850
 GameObject:
   m_ObjectHideFlags: 0

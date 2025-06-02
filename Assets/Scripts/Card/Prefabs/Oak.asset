@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
   m_Name: Oak
   m_EditorClassIdentifier: 
-  _cardName: "\uC624\uD06C"
-  _species: 0
-  _attack: 1
-  _health: 3
+  _cardName: Oak
+  _species: 3
+  _attack: 2
+  _health: 5
   _cardImage: {fileID: 0}

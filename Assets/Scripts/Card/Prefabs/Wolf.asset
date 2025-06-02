@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
   m_Name: Wolf
   m_EditorClassIdentifier: 
-  _cardName: "\uB291\uB300"
+  _cardName: Wolf
   _species: 0
-  _attack: 2
-  _health: 3
+  _attack: 3
+  _health: 2
   _cardImage: {fileID: 0}

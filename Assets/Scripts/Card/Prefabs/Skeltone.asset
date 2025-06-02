@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
   m_Name: Skeltone
   m_EditorClassIdentifier: 
-  _cardName: "\uC2A4\uCF08\uB808\uD1A4"
+  _cardName: Skeletone
   _species: 1
   _attack: 1
   _health: 1

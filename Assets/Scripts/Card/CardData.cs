@@ -13,6 +13,7 @@ public class CardData : ScriptableObject
         Savage,
         Unknown
     }
+    [Header("------- 카드 스탯 목록 ---------")]
     [SerializeField] string _cardName;
     [SerializeField] CardSpecies _species;
     [SerializeField] int _attack;
