@@ -17,3 +17,4 @@ MonoBehaviour:
   _attack: 1
   _health: 2
   _cardImage: {fileID: 0}
+  _cost: 1

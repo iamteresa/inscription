@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
-  m_Name: Oak
+  m_Name: Goblin Gruop
   m_EditorClassIdentifier: 
-  _cardName: Oak
+  _cardName: Goblin Gruop
   _species: 3
-  _attack: 2
-  _health: 5
+  _attack: 3
+  _health: 6
   _cardImage: {fileID: 0}
-  _cost: 3
+  _cost: 4

@@ -73,7 +73,7 @@ public class CardHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         // 원래 정렬 위치(originalArrangedPosition)에서 shiftAmount만큼 이동한 곳이 새로운 기본 위치가 됩니다.
         currentBasePosition = originalArrangedPosition + new Vector3(shiftAmount, 0, 0);
-        // 이 카드는 Update()에서 currentBasePosition을 목표로 움직이므로, 별도의 코루틴은 필요 없습니다.
+       
     }
 
     // 이 카드의 '기본 위치'를 원래 정렬 위치로 되돌립니다.
@@ -81,6 +81,6 @@ public class CardHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
     {
         // 원래 정렬 위치가 새로운 기본 위치가 됩니다.
         currentBasePosition = originalArrangedPosition;
-        // 이 카드는 Update()에서 currentBasePosition을 목표로 움직이므로, 별도의 코루틴은 필요 없습니다.
+        
     }
 }

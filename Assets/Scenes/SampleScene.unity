@@ -213,14 +213,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handArea: {fileID: 403100302}
+  mainCanvasRectTransform: {fileID: 920009353}
   cardPrefab: {fileID: 7793903509410112710, guid: 61fbe521e1c63bc458cea9875eed1184, type: 3}
   drawPile:
-  - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
-  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
-  - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
   - {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
+  - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
+  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
+  - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
   maxHandSize: 7
-  cardSpacing: 120
+  cardSpacing: 135
 --- !u!4 &488768588
 Transform:
   m_ObjectHideFlags: 0
