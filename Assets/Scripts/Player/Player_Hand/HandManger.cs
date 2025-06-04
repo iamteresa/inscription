@@ -1,6 +1,6 @@
-using System.Collections; // 코루틴 사용을 위해 포함
-using System.Collections.Generic; // List<T> 사용을 위해 포함
-using UnityEngine; // Unity 엔진의 기본 기능 사용을 위해 포함
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class HandManager : MonoBehaviour
 {
@@ -8,63 +8,69 @@ public class HandManager : MonoBehaviour
 
     [Header("-------- 카드 부모 오브젝트 -------------")]
     [SerializeField] Transform handArea;
-    [SerializeField] RectTransform mainCanvasRectTransform;
+    // [SerializeField] RectTransform mainCanvasRectTransform; // CardZoom 삭제로 불필요
 
     [Header("-------- 카드 프리팹 -------------")]
-    [SerializeField] GameObject cardPrefab; 
+    [SerializeField] GameObject cardPrefab;
 
     [Header("-------- 덱 -------------")]
-    [SerializeField] List<CardData> drawPile;       // 현재 뽑을 수 있는 카드 데이터들의 리스트
+    [SerializeField] List<CardData> drawPile;
 
-    [SerializeField] int maxHandSize = 7;           // 플레이어 손패의 최대 카드 수
-    [SerializeField] float cardSpacing = 120f;      // 손패 내 카드들 사이의 간격
+    [SerializeField] int maxHandSize = 7;
+    [SerializeField] float cardSpacing = 120f;
 
+    private List<GameObject> handCards = new List<GameObject>();
+    private CardHover currentlyHoveredCard = null;
 
-    private List<GameObject> handCards = new List<GameObject>();    // 현재 손패에 있는 카드 GameObject들의 리스트
-    private CardHover currentlyHoveredCard = null;                  // 현재 마우스가 올라가 있는 (호버된) CardHover 컴포넌트 참조
-
+    // --- 새로 추가된 변수 ---
+    private GameObject currentlySelectedCard = null; // 현재 선택된 카드 GameObject
 
     /// <summary>
     /// 덱에서 카드를 한 장 뽑아 손패에 추가합니다.
     /// </summary>
     public void DrawCard()
     {
-        // 손패가 최대치에 도달했는지 확인
         if (handCards.Count >= maxHandSize)
         {
             Debug.Log("손패가 가득 찼습니다!");
-            return; // 카드 뽑기 중단
+            return;
         }
 
-        // 덱이 비었는지 확인
         if (drawPile.Count == 0)
         {
             Debug.Log("덱이 비었습니다!");
-            return; // 카드 뽑기 중단
+            return;
         }
 
-        // 덱에서 무작위 카드 선택
         int index = Random.Range(0, drawPile.Count);
         CardData cardData = drawPile[index];
 
-        // 카드 프리팹을 handArea 아래에 생성
         GameObject cardGO = Instantiate(cardPrefab, handArea);
 
-        // 생성된 카드에 CardDisplay 컴포넌트가 있다면 카드 데이터로 UI 업데이트
         CardDisplay display = cardGO.GetComponent<CardDisplay>();
         if (display != null)
         {
             display.cardData = cardData;
             display.UpdateDisplay();
         }
-        
 
-        // 손패 리스트에 새로 뽑은 카드 추가
+        CardSelector selector = cardGO.GetComponent<CardSelector>();
+        if (selector != null)
+        {
+            //selector.SelectionInfoText =  ;
+
+        }
+
+        // CardZoom 관련 코드는 제거
+        // CardZoom cardZoom = cardGO.GetComponent<CardZoom>();
+        // if(cardZoom != null)
+        // {
+        // cardZoom.SetMainCanvasRectTransform(mainCanvasRectTransform);
+        // }
+
         handCards.Add(cardGO);
-        // 덱에서 뽑은 카드 데이터 제거
         drawPile.RemoveAt(index);
 
-        // 손패의 카드들을 재정렬합니다.
         ArrangeHandCards();
     }
 
@@ -73,30 +79,38 @@ public class HandManager : MonoBehaviour
     /// </summary>
     private void ArrangeHandCards()
     {
-        int count = handCards.Count;        // 현재 손패에 있는 카드 수
-        if (count == 0) return;             // 손패가 없을시 return
+        int count = handCards.Count;
+        if (count == 0) return;
 
-        // 카드들이 중앙에 정렬되도록 첫 카드의 X 위치 계산
-        // (총 너비 - 카드 하나 너비) / 2 가 아닌, 전체 카드들의 중심이 0이 되도록 계산
         float startX = -(cardSpacing * (count - 1)) / 2f;
 
-        // 각 카드를 순회하며 위치 설정
         for (int i = 0; i < count; i++)
         {
             GameObject card = handCards[i];
-            // 현재 카드의 목표 X 위치 계산
             Vector3 targetPos = new Vector3(startX + cardSpacing * i, 0, 0);
 
-            // 카드 GameObject의 로컬 위치를 즉시 목표 위치로 설정
+            // 현재 선택된 카드라면, 정렬 위치를 강제로 중앙으로 유지
+            // (선택 상태가 유지되도록, 다른 카드와 다르게 배치할 수 있음)
+            if (card == currentlySelectedCard)
+            {
+                // 선택된 카드의 위치를 중앙에 고정하고 싶다면 이 로직을 사용
+                // targetPos.x = 0; // 예시: 중앙 고정
+            }
+
             card.transform.localPosition = targetPos;
 
-            // 카드에 CardHover 컴포넌트가 있다면, 해당 카드의 '원래 정렬 위치'를 설정
-            // 이 위치는 CardHover가 호버/비켜주기 애니메이션의 기준점으로 사용합니다.
             CardHover hover = card.GetComponent<CardHover>();
             if (hover != null)
             {
                 hover.SetOriginalPosition(targetPos);
             }
+
+            // CardZoom 관련 코드는 제거
+            // CardZoom cardZoom = cardGO.GetComponent<CardZoom>();
+            // if (cardZoom != null)
+            // {
+            //     cardZoom.SetOriginalPositionAndScale(targetPos, card.transform.localScale);
+            // }
         }
     }
 
@@ -108,15 +122,27 @@ public class HandManager : MonoBehaviour
     /// <param name="isHovering">호버 중이면 true, 호버 해제면 false</param>
     public void OnCardHovered(CardHover card, bool isHovering)
     {
+        // 이미 카드가 선택된 상태라면 호버 로직을 무시합니다.
+        // 선택된 카드의 호버 상태는 CardSelector가 관리합니다.
+        if (currentlySelectedCard != null && currentlySelectedCard.GetComponent<CardSelector>().IsSelected())
+        {
+            // 하지만, 현재 호버된 카드가 선택된 카드 자신인 경우는 예외
+            if (currentlySelectedCard != card.gameObject)
+            {
+                return;
+            }
+        }
+
+
         if (isHovering)
         {
-            currentlyHoveredCard = card;    // 현재 호버된 카드를 저장
-            ApplySideShift();               // 주변 카드들을 비켜주도록 적용
+            currentlyHoveredCard = card;
+            ApplySideShift();
         }
         else
         {
-            currentlyHoveredCard = null;    // 호버된 카드 없음으로 설정
-            ResetSideShift();               // 비켜줬던 카드들을 원래 위치로 되돌림
+            currentlyHoveredCard = null;
+            ResetSideShift();
         }
     }
 
@@ -125,43 +151,38 @@ public class HandManager : MonoBehaviour
     /// </summary>
     private void ApplySideShift()
     {
-        // 호버된 카드가 없으면 아무것도 하지 않음
-        if (currentlyHoveredCard == null) return;
+        // 현재 선택된 카드가 있다면, 그 카드를 기준으로 비켜주기 로직을 적용
+        GameObject referenceCard = currentlySelectedCard != null ? currentlySelectedCard : (currentlyHoveredCard != null ? currentlyHoveredCard.gameObject : null);
 
-        int hoveredIndex = -1;      // 호버된 카드의 손패 리스트 내 인덱스
-        // 손패 리스트를 순회하며 호버된 카드의 인덱스 찾기
+        if (referenceCard == null) return;
+
+        CardHover referenceHover = referenceCard.GetComponent<CardHover>();
+        if (referenceHover == null) return;
+
+        int referenceIndex = -1;
         for (int i = 0; i < handCards.Count; i++)
         {
-            // 현재 카드가 호버된 카드와 동일한지 확인
-            if (handCards[i].GetComponent<CardHover>() == currentlyHoveredCard)
+            if (handCards[i] == referenceCard)
             {
-                hoveredIndex = i;           // 인덱스 저장
-                break;                      // 찾았으니 반복 중단
+                referenceIndex = i;
+                break;
             }
         }
 
-        // 호버된 카드를 찾지 못했으면 아무것도 하지 않음 (오류)
-        if (hoveredIndex == -1) return;
+        if (referenceIndex == -1) return;
 
-        // 호버된 카드의 SideShiftAmount 값을 가져옴 (CardHover 스크립트에서 정의)
-        float shiftAmount = currentlyHoveredCard.SideShiftAmount;
+        float shiftAmount = referenceHover.SideShiftAmount;
 
-        // 모든 손패 카드들을 순회하며 위치 조정
         for (int i = 0; i < handCards.Count; i++)
         {
-            // 호버된 카드보다 왼쪽에 있는 카드들 (인덱스가 작은 경우)
-            if (i < hoveredIndex)
+            if (i < referenceIndex)
             {
-                // 해당 카드의 CardHover 컴포넌트의 ShiftPosition을 호출하여 왼쪽으로 이동
                 handCards[i].GetComponent<CardHover>()?.ShiftPosition(-shiftAmount);
             }
-            // 호버된 카드보다 오른쪽에 있는 카드들 (인덱스가 큰 경우)
-            else if (i > hoveredIndex)
+            else if (i > referenceIndex)
             {
-                // 해당 카드의 CardHover 컴포넌트의 ShiftPosition을 호출하여 오른쪽으로 이동
                 handCards[i].GetComponent<CardHover>()?.ShiftPosition(shiftAmount);
             }
-            // 호버된 카드 자신은 위치 조정이 필요 없으므로 이 블록에 포함되지 않음
         }
     }
 
@@ -171,10 +192,80 @@ public class HandManager : MonoBehaviour
     /// </summary>
     private void ResetSideShift()
     {
-        // 모든 손패 카드 GameObject들을 순회하며 ResetShift 호출
+        // 선택된 카드가 있다면, 비켜주기 해제하지 않음
+        if (currentlySelectedCard != null) return;
+
         foreach (GameObject cardGO in handCards)
         {
             cardGO.GetComponent<CardHover>()?.ResetShift();
         }
+    }
+
+    // --- 새로 추가된 메서드들 ---
+
+    /// <summary>
+    /// CardSelector로부터 카드 선택 알림을 받습니다.
+    /// </summary>
+    public void OnCardSelected(GameObject selectedCardGO)
+    {
+        // 다른 카드가 이미 선택되어 있다면, 해당 카드의 선택을 해제합니다.
+        DeselectAllCards(selectedCardGO);
+
+        currentlySelectedCard = selectedCardGO;
+        // 선택된 카드가 호버된 것처럼 보이기 위해 강제로 ApplySideShift 호출
+        // (CardHover의 isHovered 상태를 isSelected 상태로 제어하도록 CardHover를 수정해야 함)
+        // 현재 로직에서는 `ApplySideShift`가 `currentlySelectedCard`를 참조하도록 수정했으므로 다시 호출
+        ApplySideShift();
+        Debug.Log("현재 선택된 카드: " + currentlySelectedCard.name);
+
+        // 선택된 카드는 호버 애니메이션에서 더 높은 Y 위치를 가져야 합니다.
+        // 이는 CardHover의 Update() 로직이 isSelected를 인식하여 처리해야 합니다.
+    }
+
+    /// <summary>
+    /// 선택된 카드를 제외한 모든 카드의 선택을 해제합니다.
+    /// </summary>
+    public void DeselectAllCards(GameObject exceptCard = null)
+    {
+        if (currentlySelectedCard != null && currentlySelectedCard != exceptCard)
+        {
+            CardSelector selector = currentlySelectedCard.GetComponent<CardSelector>();
+            if (selector != null)
+            {
+                selector.DeselectExternally(); // 외부에서 선택 해제 호출
+            }
+            currentlySelectedCard = null;
+            ResetSideShift(); // 선택 해제 후에는 주변 카드 위치도 원래대로
+        }
+    }
+
+    /// <summary>
+    /// CardSelector로부터 카드 배치 알림을 받습니다.
+    /// </summary>
+    public void OnCardPlaced(GameObject placedCardGO)
+    {
+        handCards.Remove(placedCardGO); // 손패 리스트에서 카드 제거
+        if (currentlySelectedCard == placedCardGO)
+        {
+            currentlySelectedCard = null; // 선택된 카드였다면 초기화
+        }
+        ResetSideShift(); // 카드 배치 후에는 주변 카드 위치를 원래대로
+        ArrangeHandCards(); // 남은 카드 재정렬
+        Debug.Log(placedCardGO.name + " 카드가 배치되어 손패에서 제거되었습니다.");
+        // CardSelector에서 GameObject.SetActive(false)를 호출하여 사라지게 처리
+    }
+
+    /// <summary>
+    /// CardSelector로부터 카드 선택 취소 알림을 받습니다.
+    /// </summary>
+    public void OnCardDeselected(GameObject deselectedCardGO)
+    {
+        if (currentlySelectedCard == deselectedCardGO)
+        {
+            currentlySelectedCard = null; // 선택된 카드 초기화
+        }
+        ResetSideShift(); // 선택 취소 후 주변 카드 위치 원래대로
+        // OnPointerExit에서 이미 CardHover의 호버 상태를 해제하므로 여기서 추가적인 작업은 필요 없음
+        Debug.Log(deselectedCardGO.name + " 카드의 선택이 취소되었습니다.");
     }
 }

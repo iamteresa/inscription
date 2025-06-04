@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class HandAreaAnimator : MonoBehaviour
 {
-    [SerializeField] private float handDownAmount = 300f; // 손패가 아래로 내려갈 때 이동할 거리.
+    [SerializeField] private float handDownAmount = 300f; // 손패가 들어올 때 이동할 거리.
 
     [SerializeField] private float handMoveSpeed = 8f;    // 손패가 이동하는 속도.
     

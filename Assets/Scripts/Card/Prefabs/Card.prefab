@@ -281,6 +281,7 @@ GameObject:
   - component: {fileID: 7141371669160316937}
   - component: {fileID: 2866389606976056128}
   - component: {fileID: 6490902560125159253}
+  - component: {fileID: 249643385676603539}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -381,9 +382,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f0a4d3b846f3d347b2fd4d767bb5591, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverHeight: 120
-  moveSpeed: 10
+  _hoverHeight: 50
+  _moveSpeed: 10
+  _selectedHeight: 100
   <SideShiftAmount>k__BackingField: 170
+--- !u!114 &249643385676603539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7793903509410112710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37744e10d87b9ad478f15dd5f2312623, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  selectedHeightOffset: 90
+  selectionInfoText: {fileID: 0}
 --- !u!1 &8257328336341322850
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,7 +702,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.81311363, y: 0.70924836}
   m_AnchorMax: {x: 0.9431136, y: 0.892}
-  m_AnchoredPosition: {x: 0.19998169, y: -0.33060837}
+  m_AnchoredPosition: {x: 0.19998169, y: -0.33059692}
   m_SizeDelta: {x: 2.0000362, y: 1.3139}
   m_Pivot: {x: 0.5000018, y: 0.56581295}
 --- !u!222 &6340124315245618719
