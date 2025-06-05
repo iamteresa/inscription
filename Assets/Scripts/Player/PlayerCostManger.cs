@@ -48,7 +48,7 @@ public class PlayerCostManager : MonoBehaviour
         currentCost = maxCost;
         UpdateCostUI();
     }
-
+    
     private void UpdateCostUI()
     {
         if (costText != null)
