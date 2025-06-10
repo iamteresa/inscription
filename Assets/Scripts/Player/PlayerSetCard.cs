@@ -9,8 +9,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
 
     private bool isSelected = false; // 이 카드가 선택되었는지 여부
 
-    // UI 연동을 위한 TextMeshProUGUI 변수.
-    // HandManager가 이 변수에 전역 UI 텍스트를 할당해 줄 것입니다.
+    // UI 연동을 위한 TextMeshProUGUI 변수. HandManager가 이 변수에 전역 UI 텍스트를 할당해 줄 것입니다.
     [SerializeField] private TextMeshProUGUI _selectionInfoText;
 
     // HandManager에서 이 텍스트 컴포넌트에 접근하고 설정할 수 있도록 public 프로퍼티 제공
@@ -28,7 +27,6 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
             Debug.LogError("CardSelector: CardHover 컴포넌트를 찾을 수 없습니다.", this);
         }
 
-        // HandManager를 찾는 것은 필수적입니다.
         handManager = FindObjectOfType<HandManager>();
         if (handManager == null)
         {
@@ -39,6 +37,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
         // 여기서는 null 체크나 HideSelectionInfo()를 호출하지 않습니다.
     }
 
+    // 마우스 클릭 이벤트 처리
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left) // 좌클릭 시
@@ -47,10 +46,11 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
             {
                 SelectCard(); // 선택되지 않은 상태면 선택
             }
-            else
-            {
-                TryToPlaceCard(); // 이미 선택된 상태면 배치 시도
-            }
+            // else {
+            // 이미 선택된 상태에서 카드 자체를 좌클릭하는 동작은 이제 배치를 트리거하지 않습니다.
+            // 대신 사용자가 전장 슬롯을 클릭하여 배치하도록 유도합니다.
+            // 필요하다면, 이 else 블록에 카드 정보 상세 보기 등의 다른 기능을 추가할 수 있습니다.
+            // }
         }
         else if (eventData.button == PointerEventData.InputButton.Right) // 우클릭 시
         {
@@ -71,35 +71,14 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
         isSelected = true;
         // 선택되면 CardHover가 호버 높이를 유지하도록 CardHover의 Update() 로직이 처리합니다.
 
-        // HandManager에 선택된 카드 알림 (BattlefieldManager로 연결될 수 있음)
+        // HandManager에 선택된 카드 알림 (BattlefieldManager로 연결되어 배치 대기 상태로 설정)
         handManager.OnCardSelected(this.gameObject);
         Debug.Log(this.gameObject.name + " 카드가 선택되었습니다.");
 
         ShowSelectionInfo(); // UI 텍스트 표시
     }
 
-    /// <summary>
-    /// 카드를 배치하려고 시도합니다. HandManager에게 이 요청을 보냅니다.
-    /// </summary>
-    private void TryToPlaceCard()
-    {
-        if (handManager == null) return;
 
-        // HandManager에게 카드 배치 시도를 알립니다.
-        // 실제 Cost 확인 및 배치 로직은 BattlefieldManager가 수행합니다.
-        handManager.OnCardPlaced(this.gameObject);
-
-        // 배치 시도 후에는 이 카드의 선택 상태를 해제하고 UI를 숨깁니다.
-        // 성공 여부와 관계없이 CardSelector의 역할은 여기서 끝납니다.
-        // 만약 배치가 실패하여 카드를 다시 손패로 돌려보내야 한다면,
-        // 이는 HandManager 또는 BattlefieldManager에서 추가적인 로직으로 처리해야 합니다.
-        isSelected = false;
-        if (cardHover != null)
-        {
-            cardHover.OnPointerExit(null); // 호버 상태도 해제
-        }
-        HideSelectionInfo(); // UI 텍스트 숨기기
-    }
 
     /// <summary>
     /// 카드의 선택 및 호버 상태를 취소합니다.
@@ -112,10 +91,10 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
         // CardHover의 호버 상태를 해제
         if (cardHover != null)
         {
-            cardHover.OnPointerExit(null); // 더미 EventData 전달
+            cardHover.OnPointerExit(null);
         }
 
-        // HandManager에 선택 취소 알림
+        // HandManager에 선택 취소 알림 (BattlefieldManager에게 배치 대기 상태 해제 요청)
         handManager.OnCardDeselected(this.gameObject);
         Debug.Log(this.gameObject.name + " 카드의 선택 및 호버가 취소되었습니다.");
 
@@ -124,7 +103,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
 
     /// <summary>
     /// 이 카드의 선택 상태를 외부에 의해 해제할 때 호출됩니다.
-    /// (주로 HandManager의 DeselectAllCards에서 호출)
+    /// (주로 HandManager의 DeselectAllCards나 BattlefieldManager의 ClearCardWaitingForPlacement에서 호출)
     /// </summary>
     public void DeselectExternally()
     {
@@ -134,7 +113,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
             // CardHover의 호버 상태도 해제
             if (cardHover != null)
             {
-                cardHover.OnPointerExit(null); // 더미 EventData 전달
+                cardHover.OnPointerExit(null);
             }
             Debug.Log(this.gameObject.name + " 카드의 선택이 외부에서 해제되었습니다.");
             HideSelectionInfo(); // UI 텍스트 숨기기
@@ -159,7 +138,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
     {
         if (_selectionInfoText != null)
         {
-            _selectionInfoText.text = "좌클릭: 카드 배치 | 우클릭: 선택 취소"; // 사용자에게 보여줄 메시지
+            _selectionInfoText.text = "[좌클릭] : 배치 / [우클릭] : 취소"; // 사용자에게 보여줄 메시지
             _selectionInfoText.gameObject.SetActive(true);
         }
         else

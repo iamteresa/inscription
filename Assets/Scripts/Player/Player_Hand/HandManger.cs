@@ -19,8 +19,9 @@ public class HandManager : MonoBehaviour
     [SerializeField] float cardSpacing = 120f;
 
     // --- 참조 매니저들 (인스펙터에서 직접 연결하는 것이 좋습니다.) ---
+    [Header("---------- 다른 매니저 참조 ---------")]
     [SerializeField] private BattlefieldManager battlefieldManager;
-    [SerializeField] private PlayerCostManager playerCostManager; // HandManager가 PlayerCostManager를 직접 참조하는 경우는 드뭅니다. (주로 BattlefieldManager가 참조)
+    [SerializeField] private PlayerCostManager playerCostManager; 
 
     // HandManager가 관리할 전역 UI 텍스트 (CardSelector에 주입)
     [Header("-------- UI 연동 -------------")]
@@ -41,12 +42,12 @@ public class HandManager : MonoBehaviour
                 Debug.LogError("HandManager: BattlefieldManager가 연결되지 않았거나 씬에서 찾을 수 없습니다.", this);
             }
         }
-        if (playerCostManager == null) // HandManager가 Cost를 직접 다룰 일은 적지만, 필요한 경우를 대비
+        if (playerCostManager == null) 
         {
             playerCostManager = FindObjectOfType<PlayerCostManager>();
             if (playerCostManager == null)
             {
-                Debug.LogWarning("HandManager: PlayerCostManager가 연결되지 않았거나 씬에서 찾을 수 없습니다.", this);
+                Debug.LogWarning("HandManager: PlayerCostManager가 연결되지 않았거나 씬에서 찾을 수 없습니다. (필요 시 연결)", this);
             }
         }
 
@@ -114,8 +115,6 @@ public class HandManager : MonoBehaviour
             GameObject card = handCards[i];
             Vector3 targetPos = new Vector3(startX + cardSpacing * i, 0, 0);
 
-            // 선택된 카드는 호버 위치에 고정될 것이므로, 정렬에서 제외하거나 특별 처리
-            // CardHover가 이미 이를 처리하므로 여기서는 원래 위치만 설정
             card.transform.localPosition = targetPos;
 
             CardHover hover = card.GetComponent<CardHover>();
@@ -216,28 +215,35 @@ public class HandManager : MonoBehaviour
 
     /// <summary>
     /// CardSelector로부터 카드 선택 알림을 받습니다.
+    /// 선택된 카드를 BattlefieldManager에게 알리고, 배치 대기 상태로 만듭니다.
     /// </summary>
     public void OnCardSelected(GameObject selectedCardGO)
     {
-        // 다른 카드가 이미 선택되어 있다면, 해당 카드의 선택을 해제합니다.
-        DeselectAllCards(selectedCardGO);
+        DeselectAllCards(selectedCardGO); // 다른 카드 선택 해제
 
         currentlySelectedCard = selectedCardGO;
         ApplySideShift(); // 선택된 카드를 기준으로 주변 카드 이동
         Debug.Log("현재 선택된 카드: " + currentlySelectedCard.name);
+
+        // BattlefieldManager에게 현재 이 카드를 배치 대기 상태로 설정하도록 알립니다.
+        if (battlefieldManager != null)
+        {
+            battlefieldManager.SetCardWaitingForPlacement(currentlySelectedCard);
+        }
 
         // UI 텍스트 업데이트는 CardSelector가 직접 처리합니다. (ShowSelectionInfo() 호출)
     }
 
     /// <summary>
     /// 선택된 카드를 제외한 모든 카드의 선택을 해제합니다.
+    /// 이 메서드는 현재 선택된 카드만 초기화하고, 실제 카드의 DeselectExternally는 CardSelector가 호출합니다.
     /// </summary>
     public void DeselectAllCards(GameObject exceptCard = null)
     {
-        // handCards 리스트에 있는 모든 카드를 순회하며 DeselectExternally 호출
+        // 손패 리스트에 있는 모든 카드를 순회하며 선택 해제
         foreach (GameObject cardGO in handCards)
         {
-            if (cardGO != exceptCard && cardGO != null) // exceptCard는 선택될 새 카드이므로 제외
+            if (cardGO != exceptCard && cardGO != null) 
             {
                 CardSelector selector = cardGO.GetComponent<CardSelector>();
                 if (selector != null && selector.IsSelected())
@@ -247,59 +253,35 @@ public class HandManager : MonoBehaviour
             }
         }
 
-        // 이 로직은 DeselectExternally가 이미 isSelected를 false로 만들고 UI를 숨기므로,
-        // 현재 선택된 카드만 초기화하고 ResetSideShift를 호출합니다.
+        // 현재 선택된 카드도 상태 정리 (다른 카드를 선택했거나 모두 해제하는 경우)
         if (currentlySelectedCard != null && currentlySelectedCard != exceptCard)
         {
-            currentlySelectedCard = null;
-            ResetSideShift(); // 선택 해제 후에는 주변 카드 위치도 원래대로
+             currentlySelectedCard = null;
+             ResetSideShift(); // 선택 해제 후에는 주변 카드 위치도 원래대로
         }
-        // 만약 exceptCard가 null (모든 카드 해제)이고, 현재 선택된 카드가 없으면 UI도 숨김
-        else if (exceptCard == null && currentlySelectedCard == null)
+
+        // BattlefieldManager에게도 카드 배치 대기 상태를 해제하도록 알립니다.
+        if (battlefieldManager != null)
         {
-            HideGlobalSelectionInfo(); // 전역 UI 텍스트 숨김 (CardSelector에 주입된 텍스트는 해당 카드가 처리)
+            battlefieldManager.ClearCardWaitingForPlacement();
         }
     }
 
     /// <summary>
-    /// CardSelector로부터 카드 배치 시도 알림을 받습니다.
-    /// 이 메서드는 BattlefieldManager에게 배치를 요청하고, 성공 시 손패에서 카드를 제거합니다.
+    /// BattlefieldManager로부터 카드가 성공적으로 배치되었음을 알립니다.
     /// </summary>
-    public void OnCardPlaced(GameObject placedCardGO)
+    /// <param name="placedCardGO">성공적으로 배치된 카드 GameObject</param>
+    public void NotifyCardPlacedSuccessfully(GameObject placedCardGO)
     {
-        if (battlefieldManager == null)
+        handCards.Remove(placedCardGO); // 손패 리스트에서 카드 제거
+        if (currentlySelectedCard == placedCardGO)
         {
-            Debug.LogError("HandManager: BattlefieldManager가 없어 카드를 배치할 수 없습니다.", this);
-            return;
+            currentlySelectedCard = null; // 선택된 카드였다면 초기화
         }
-
-        // BattlefieldManager에게 카드 배치 요청
-        bool placedSuccessfully = battlefieldManager.TryPlaceCard(placedCardGO);
-
-        if (placedSuccessfully)
-        {
-            // 성공적으로 배치되면 손패에서 카드 제거
-            handCards.Remove(placedCardGO);
-            if (currentlySelectedCard == placedCardGO)
-            {
-                currentlySelectedCard = null; // 선택된 카드였다면 초기화
-            }
-            ResetSideShift(); // 카드 배치 후에는 주변 카드 위치를 원래대로
-            ArrangeHandCards(); // 남은 카드 재정렬
-            Debug.Log(placedCardGO.name + " 카드가 배치되어 손패에서 제거되었습니다.");
-            // CardSelector에서 GameObject.SetActive(false)를 이미 호출합니다.
-        }
-        else
-        {
-            // 배치 실패 시:
-            // - 카드의 isSelected 상태는 이미 CardSelector에서 TryToPlaceCard 호출 후 false로 설정됩니다.
-            // - CardHover의 OnPointerExit(null)도 호출됩니다.
-            // - UI 텍스트도 CardSelector에서 HideSelectionInfo()로 숨겨집니다.
-            // 따라서 여기서 추가적인 처리 (예: SetActive(true)로 되돌리기)는 필요하지 않을 수 있습니다.
-            // 만약 카드를 원래 손패 위치로 되돌리고 싶다면, 여기에서 CardSelector.DeselectExternally() 등을 다시 호출하고,
-            // CardHover의 ResetPosition을 호출하는 로직을 추가해야 합니다.
-            Debug.Log($"{placedCardGO.name} 카드 배치 실패 (BattlefieldManager에서 원인 확인).");
-        }
+        ResetSideShift(); // 카드 배치 후에는 주변 카드 위치를 원래대로
+        ArrangeHandCards(); // 남은 카드 재정렬
+        Debug.Log(placedCardGO.name + " 카드가 성공적으로 배치되어 손패에서 제거되었습니다.");
+        // CardSelector에서 GameObject.SetActive(false)를 이미 호출합니다.
     }
 
     /// <summary>
@@ -313,14 +295,16 @@ public class HandManager : MonoBehaviour
         }
         ResetSideShift(); // 선택 취소 후 주변 카드 위치 원래대로
         Debug.Log(deselectedCardGO.name + " 카드의 선택이 취소되었습니다.");
-        // UI 텍스트는 CardSelector에서 HideSelectionInfo()를 호출하여 숨겨집니다.
+
+        // BattlefieldManager에게도 카드 배치 대기 상태를 해제하도록 알립니다.
+        if (battlefieldManager != null)
+        {
+            battlefieldManager.ClearCardWaitingForPlacement();
+        }
     }
 
-    // --- 전역 UI 텍스트 제어 메서드 (HandManager에서만 호출, CardSelector에 주입할 텍스트를 관리) ---
+    // --- 전역 UI 텍스트 제어 메서드 ---
 
-    // 이 메서드들은 HandManager가 CardSelector에 주입할 TextMeshProUGUI 인스턴스를 관리하고
-    // 필요에 따라 초기 상태를 제어하는 데 사용됩니다.
-    // 개별 카드의 선택 정보 표시는 CardSelector가 직접 수행합니다.
     private void ShowGlobalSelectionInfo(string message)
     {
         if (_globalSelectionInfoText != null)
