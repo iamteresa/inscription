@@ -1,7 +1,10 @@
+// BattlefieldManager.cs
+
 using UnityEngine;
 using TMPro;
 using System.Collections;
-using System.Collections.Generic; // List를 사용하기 위해 추가
+using System.Collections.Generic;
+using UnityEngine.UI; // RectTransform을 사용하기 위해 이 줄이 필요합니다.
 
 public class BattlefieldManager : MonoBehaviour
 {
@@ -11,18 +14,18 @@ public class BattlefieldManager : MonoBehaviour
     [Header("---------- 배치 관련 메시지 UI ---------")]
     [SerializeField] private TextMeshProUGUI placementInfoText;
 
-    [Header("---------- 배치될 카드의 속성 ---------")]
-    [SerializeField] private Vector3 placedCardScale = new Vector3(1f, 1f, 1f); // 배치될 카드의 크기 (인스펙터에서 조절)
-    [SerializeField] private Vector3 cardLocalOffset = Vector3.zero; // 배치될 카드의 로컬 오프셋 (스폰포인트 기준)
+    // 이 변수들은 이제 BattlefieldSlot에서 관리되므로 주석 처리하거나 제거할 수 있습니다.
+    // [Header("---------- 배치될 카드의 속성 ---------")]
+    // [SerializeField] private Vector3 placedCardScale = new Vector3(1f, 1f, 1f);
+    // [SerializeField] private Vector3 cardLocalOffset = Vector3.zero;
 
- 
+
     [Header("---------- 다른 매니저 참조 ---------")]
     [SerializeField] private PlayerCostManager playerCostManager;
     [SerializeField] private HandManager handManager;
 
     private GameObject[] occupiedSpawnPoints;
 
-    // 현재 배치 대기 중인 카드
     private GameObject cardWaitingForPlacement = null;
 
     void Awake()
@@ -52,7 +55,7 @@ public class BattlefieldManager : MonoBehaviour
             if (handManager == null)
             {
                 Debug.LogWarning("HandManager가 연결되지 않았거나 씬에서 찾을 수 없습니다.", this);
-            }   
+            }
         }
 
         if (placementInfoText == null)
@@ -62,25 +65,18 @@ public class BattlefieldManager : MonoBehaviour
 
         HidePlacementInfo();
 
-        // 각 spawnPoints GameObject에 BattlefieldSlot 스크립트를 설정합니다.
-        // 콜라이더는 이제 이 메서드에서 자동으로 추가하지 않습니다. 수동으로 추가해야 합니다.
-        SetupBattlefieldSlots();
+        SetupBattlefieldSlots(); // BattlefieldSlot 컴포넌트를 스폰포인트에 동적으로 추가하고 인덱스 설정
     }
 
-    /// <summary>
-    /// 각 스폰 포인트 GameObject에 BattlefieldSlot 스크립트를 설정합니다.
-    /// 콜라이더는 이제 수동으로 추가해야 합니다.
-    /// </summary>
     private void SetupBattlefieldSlots()
     {
         for (int i = 0; i < spawnPoints.Count; i++)
         {
             Transform slotTransform = spawnPoints[i];
-            // NULL 참조 오류 방지를 위한 부분 (스폰포인트 리스트가 비어있을 때)
             if (slotTransform == null)
             {
                 Debug.LogWarning($"SpawnPoints 리스트의 {i}번째 슬롯이 비어있습니다." +
-                    $" 해당 슬롯은 건너뜁니다. 인스펙터에서 Transform을 연결해주세요.", this);
+                    $" 해당 슬롯은 건너뜜니다. 인스펙터에서 Transform을 연결해주세요.", this);
                 occupiedSpawnPoints[i] = null;
                 continue;
             }
@@ -91,17 +87,10 @@ public class BattlefieldManager : MonoBehaviour
             {
                 slot = slotGO.AddComponent<BattlefieldSlot>();
             }
-            slot.slotIndex = i; // 슬롯 인덱스 할당
-
-            
+            slot.SetSlotIndex(i); // BattlefieldSlot의 SetSlotIndex 메서드를 사용
         }
     }
 
-
-    /// <summary>
-    /// 카드 배치 관련 정보를 UI에 표시합니다.
-    /// </summary>
-    /// <param name="message">표시할 메시지</param>
     public void ShowPlacementInfo(string message)
     {
         if (placementInfoText != null)
@@ -109,13 +98,10 @@ public class BattlefieldManager : MonoBehaviour
             placementInfoText.text = message;
             placementInfoText.gameObject.SetActive(true);
             StopAllCoroutines();
-            StartCoroutine(HidePlacementInfoAfterDelay(3f)); // 3초 후 사라지게
+            StartCoroutine(HidePlacementInfoAfterDelay(3f));
         }
     }
 
-    /// <summary>
-    /// 카드 배치 관련 정보를 UI에서 숨깁니다.
-    /// </summary>
     public void HidePlacementInfo()
     {
         if (placementInfoText != null)
@@ -130,10 +116,6 @@ public class BattlefieldManager : MonoBehaviour
         HidePlacementInfo();
     }
 
-    /// <summary>
-    /// HandManager로부터 카드가 선택되어 배치 대기 상태임을 알립니다.
-    /// </summary>
-    /// <param name="cardGO">배치 대기 중인 카드 GameObject</param>
     public void SetCardWaitingForPlacement(GameObject cardGO)
     {
         cardWaitingForPlacement = cardGO;
@@ -146,7 +128,7 @@ public class BattlefieldManager : MonoBehaviour
     /// 이 메서드에서 Cost 확인 및 카드 배치 로직을 수행합니다.
     /// </summary>
     /// <param name="clickedSlotIndex">클릭된 슬롯의 인덱스</param>
-    public void OnSlotClicked(int clickedSlotIndex)
+    public void OnSlotClicked(int clickedSlotIndex) // BattlefieldSlot에서 이 메서드를 호출합니다.
     {
         if (cardWaitingForPlacement == null)
         {
@@ -204,10 +186,64 @@ public class BattlefieldManager : MonoBehaviour
         }
 
         GameObject card = cardWaitingForPlacement;
-        card.transform.SetParent(spawnPoints[clickedSlotIndex]);
-        card.transform.localPosition = cardLocalOffset; // <--- 수정: 시리얼라이즈된 오프셋 사용
-        card.transform.localRotation = Quaternion.identity;
-        card.transform.localScale = placedCardScale; // <--- 수정: 시리얼라이즈된 스케일 사용
+        RectTransform cardRect = card.GetComponent<RectTransform>();
+
+        if (cardRect == null)
+        {
+            Debug.LogError("BattlefieldManager: 배치할 카드에 RectTransform이 없습니다.", card);
+            ClearCardWaitingForPlacement();
+            return;
+        }
+
+        // 1. 카드를 슬롯의 자식으로 설정합니다. (worldPositionStays = false)
+        // 이렇게 하면 카드의 localPosition이 새로운 부모를 기준으로 재계산됩니다.
+        card.transform.SetParent(spawnPoints[clickedSlotIndex], false);
+
+        // 2. 해당 슬롯의 BattlefieldSlot 컴포넌트에서 카드 변환을 적용합니다.
+        BattlefieldSlot targetBattlefieldSlot = spawnPoints[clickedSlotIndex].GetComponent<BattlefieldSlot>();
+        if (targetBattlefieldSlot != null)
+        {
+            targetBattlefieldSlot.ApplyPlacementTransform(cardRect); // <--- BattlefieldSlot에서 오프셋/스케일 적용
+        }
+        else
+        {
+            Debug.LogWarning($"BattlefieldManager: {spawnPoints[clickedSlotIndex].name}에 BattlefieldSlot 컴포넌트가 없습니다. 기본값으로 배치합니다.", this);
+            // BattlefieldSlot이 없는 경우를 대비한 기본 배치 로직
+            cardRect.localPosition = Vector2.zero; // 중앙으로 설정
+            cardRect.localScale = Vector3.one;     // 기본 스케일
+            cardRect.localRotation = Quaternion.identity; // 회전 초기화
+        }
+
+        // ***** 불필요한 컴포넌트 제거 *****
+        // 배치된 카드에서 더 이상 필요 없는 컴포넌트들을 제거합니다.
+        // CardDisplay는 남겨둡니다.
+
+        // CardHover 컴포넌트 제거
+        CardHover cardHover = card.GetComponent<CardHover>();
+        if (cardHover != null)
+        {
+            Destroy(cardHover);
+            Debug.Log($"Removed CardHover from {card.name}");
+        }
+
+        // CardSelector 컴포넌트 제거 (카드를 클릭하여 선택하는 기능을 담당했다면)
+        CardSelector cardSelector = card.GetComponent<CardSelector>();
+        if (cardSelector != null)
+        {
+            Destroy(cardSelector);
+            Debug.Log($"Removed CardSelector from {card.name}");
+        }
+
+        // 혹시 드래그 기능을 하는 스크립트가 있다면 (예: CardDragHandler, IBeginDragHandler, IDragHandler, IEndDragHandler 구현 스크립트)
+        // 여기에 추가하여 제거할 수 있습니다.
+        // 예를 들어:
+        // YourCardDragHandler dragHandler = card.GetComponent<YourCardDragHandler>();
+        // if (dragHandler != null)
+        // {
+        //     Destroy(dragHandler);
+        //     Debug.Log($"Removed YourCardDragHandler from {card.name}");
+        // }
+
 
         occupiedSpawnPoints[clickedSlotIndex] = card;
 

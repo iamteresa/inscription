@@ -1,10 +1,15 @@
+// BattlefieldSlot.cs
+
 using UnityEngine;
-using UnityEngine.EventSystems; // 클릭 이벤트 처리를 위해 필요
+using UnityEngine.EventSystems; // IPointerClickHandler를 위해 필요합니다.
 
 public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
 {
-    // 이 슬롯의 고유 인덱스. BattlefieldManager가 설정합니다.
-    public int slotIndex;
+    [SerializeField] private int slotIndex; // 인스펙터에서 설정 필수!
+
+    [Header("---------- 배치될 카드의 로컬 오프셋 및 스케일 ---------")]
+    [SerializeField] private Vector2 placedCardLocalOffset = Vector2.zero; // 이 슬롯에 배치될 카드의 로컬 오프셋
+    [SerializeField] private Vector3 placedCardScale = Vector3.one;       // 이 슬롯에 배치될 카드의 크기
 
     private BattlefieldManager battlefieldManager;
 
@@ -13,29 +18,15 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
         battlefieldManager = FindObjectOfType<BattlefieldManager>();
         if (battlefieldManager == null)
         {
-            Debug.LogError($"{gameObject.name}에서 BattlefieldManager를 찾을 수 없습니다. " +
-                $"씬에 BattlefieldManager 스크립트가 부착된 오브젝트가 있는지 확인하세요.", this);
-            enabled = false; // 매니저 없으면 스크립트 비활성화
-            return;
+            Debug.LogError("BattlefieldSlot: BattlefieldManager를 찾을 수 없습니다. 씬에 BattlefieldManager 스크립트가 붙은 GameObject가 있는지 확인하세요.", this);
+        }
+
+        // 혹시 스폰포인트에 RectTransform이 없으면 경고 (UI 요소여야 함)
+        if (GetComponent<RectTransform>() == null)
+        {
+            Debug.LogWarning($"BattlefieldSlot: '{gameObject.name}'에 RectTransform이 없습니다. UI 요소를 클릭하려면 RectTransform이 필요합니다.", this);
         }
     }
-
-    void Start() // Start 메서드에서 콜라이더를 확인
-    {
-        // 2D 게임용 콜라이더 검사 (Collider2D)
-        Collider2D collider2D = GetComponent<Collider2D>();
-        if (collider2D == null)
-        {
-            Debug.LogWarning($"={gameObject.name}에 BoxCollider2D가 없습니다. " +
-                $"Is Trigger'를 체크해주세요.", this);
-        }
-        else if (!collider2D.isTrigger) // isTrigger가 설정 안 되어 있다면 경고
-        {
-            Debug.LogWarning($"{gameObject.name}의 BoxCollider2D에 'Is Trigger'가 " +
-                $"체크되어 있지 않습니다.", this);
-        }
-    }
-
 
     // 마우스 클릭 이벤트 처리
     public void OnPointerClick(PointerEventData eventData)
@@ -44,8 +35,39 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
         {
             if (battlefieldManager != null)
             {
-                battlefieldManager.OnSlotClicked(slotIndex);
+                // BattlefieldManager의 OnSlotClicked 메서드를 호출하여 카드를 배치 요청
+                battlefieldManager.OnSlotClicked(slotIndex); // OnSlotClicked가 TryPlaceCard의 역할을 할 것입니다.
+            }
+            else
+            {
+                Debug.LogWarning("BattlefieldSlot: BattlefieldManager가 할당되지 않아 클릭 이벤트를 처리할 수 없습니다.");
             }
         }
+    }
+
+    /// <summary>
+    /// 배치될 카드에 이 슬롯의 특정 로컬 오프셋과 스케일을 적용합니다.
+    /// </summary>
+    /// <param name="cardRect">배치될 카드의 RectTransform</param>
+    public void ApplyPlacementTransform(RectTransform cardRect)
+    {
+        cardRect.localPosition = placedCardLocalOffset; // anchoredPosition 대신 localPosition 사용
+        cardRect.localScale = placedCardScale;
+        cardRect.localRotation = Quaternion.identity; // 회전은 초기화 (필요하다면 옵션으로 추가)
+
+        Debug.Log($"Applied custom placement transform to {cardRect.name} on slot {slotIndex}. Offset: {placedCardLocalOffset}, Scale: {placedCardScale}");
+    }
+
+
+    // 외부에서 이 슬롯의 인덱스를 설정해야 할 경우를 대비한 Setter (BattlefieldManager에서 사용)
+    public void SetSlotIndex(int index)
+    {
+        slotIndex = index;
+    }
+
+    // 외부에서 이 슬롯의 인덱스를 가져와야 할 경우를 대비한 Getter (선택 사항)
+    public int GetSlotIndex()
+    {
+        return slotIndex;
     }
 }
