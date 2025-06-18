@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.113681294, y: 0.4392483}
   m_AnchorMax: {x: 0.9106594, y: 0.78349894}
-  m_AnchoredPosition: {x: -1.2000008, y: 0.5}
+  m_AnchoredPosition: {x: -1.199997, y: 0.5}
   m_SizeDelta: {x: 1, y: 49}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7239215817038784158
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 23.3
+  m_fontSize: 54.7
   m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -318,7 +318,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.7643407, y: 0.24974944}
   m_AnchorMax: {x: 0.9106594, y: 0.41900003}
-  m_AnchoredPosition: {x: 0.000015258789, y: 1.1601}
+  m_AnchoredPosition: {x: 0.000015258789, y: 1.1601028}
   m_SizeDelta: {x: 0.00003624, y: 3.3139}
   m_Pivot: {x: 0.5000018, y: 0.56581295}
 --- !u!222 &8250761829937491990
@@ -376,7 +376,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25
+  m_fontSize: 57.8
   m_fontSizeBase: 45
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -461,8 +461,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 123.25061, y: 148.1608}
+  m_AnchoredPosition: {x: 87.33545, y: -108.240845}
+  m_SizeDelta: {x: 297.9213, y: 364.6424}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &317348982363328041
 CanvasRenderer:
@@ -514,7 +514,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baa9c95dd37d5b844b30166280ec2969, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardData: {fileID: 0}
   NameText: {fileID: 2797361530855320850}
   SpeciesText: {fileID: 8218549166314533836}
   AttackText: {fileID: 4397765552588362504}
@@ -522,6 +521,7 @@ MonoBehaviour:
   CardImage: {fileID: 3012348057351273062}
   CardSkillImage: {fileID: 2213308596142939412}
   Cost: {fileID: 6523187438891939433}
+  cardData: {fileID: 0}
 --- !u!114 &13515229336066918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -534,11 +534,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42714fcf8232b0441b356acb2704d1f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardData: {fileID: 0}
-  attackText: {fileID: 0}
-  healthText: {fileID: 0}
-  cardImageDisplay: {fileID: 0}
-  abilityDescriptionText: {fileID: 0}
+  cardDisplay: {fileID: 2866389606976056128}
   faction: 0
 --- !u!1 &8257328336341322850
 GameObject:
@@ -574,7 +570,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.113681294, y: 0.24974944}
   m_AnchorMax: {x: 0.25188646, y: 0.4392483}
-  m_AnchoredPosition: {x: 0.4999771, y: 0.30006027}
+  m_AnchoredPosition: {x: 0.49998474, y: 0.3000641}
   m_SizeDelta: {x: 0.4446001, y: -1.4021997}
   m_Pivot: {x: 0.49999875, y: 0.49999946}
 --- !u!222 &7290686698460151671
@@ -632,7 +628,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24.7
+  m_fontSize: 61.4
   m_fontSizeBase: 45
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -708,7 +704,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.34122714, y: 0.79749894}
   m_AnchorMax: {x: 0.69500005, y: 0.8447495}
-  m_AnchoredPosition: {x: 1.6000004, y: -1.0165863}
+  m_AnchoredPosition: {x: 1.5999985, y: -1.0165863}
   m_SizeDelta: {x: 36.953598, y: 13.7279}
   m_Pivot: {x: 0.46411377, y: 0.68341315}
 --- !u!222 &7398527126084324865
@@ -766,7 +762,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10.3
+  m_fontSize: 23.8
   m_fontSizeBase: 10
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -900,7 +896,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 25
+  m_fontSize: 60
   m_fontSizeBase: 45
   m_fontWeight: 400
   m_enableAutoSizing: 1

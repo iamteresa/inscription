@@ -12,7 +12,7 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
     [SerializeField] private Vector3 placedCardScale = Vector3.one;       // 이 슬롯에 배치될 카드의 크기
 
     private BattlefieldManager battlefieldManager;
-
+    
     void Awake()
     {
         battlefieldManager = FindObjectOfType<BattlefieldManager>();
@@ -55,7 +55,8 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
         cardRect.localScale = placedCardScale;
         cardRect.localRotation = Quaternion.identity; // 회전은 초기화 (필요하다면 옵션으로 추가)
 
-        Debug.Log($"Applied custom placement transform to {cardRect.name} on slot {slotIndex}. Offset: {placedCardLocalOffset}, Scale: {placedCardScale}");
+        Debug.Log($"Applied custom placement transform to {cardRect.name} on slot " +
+            $"{slotIndex}. Offset: {placedCardLocalOffset}, Scale: {placedCardScale}");
     }
 
 

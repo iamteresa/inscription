@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI; // UI Image 컴포넌트를 사용하기 위해 필요
-using UnityEngine.SceneManagement; // 씬 관리를 위해 추가
+using UnityEngine.SceneManagement;
+using TMPro; // 씬 관리를 위해 추가
 
 public class PlayerHpManger : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class PlayerHpManger : MonoBehaviour
     public int CurrentHp => _currentHealth;
 
     [Header("--------------UI 연동---------------")]
-    [SerializeField] private Image hpFillImage; // HP 바의 fill Image 컴포넌트
+    [SerializeField] private Image _hpFillImage; // HP 바의 fill Image 컴포넌트
+    [SerializeField] private TextMeshProUGUI _hpText;
 
     // 플레이어가 데미지를 받을 때 호출할 이벤트 (선택 사항: 나중에 이벤트 시스템 구현 시 유용)
     // public event System.Action<int> OnHealthChanged;
@@ -24,7 +26,7 @@ public class PlayerHpManger : MonoBehaviour
         _currentHealth = maxHealth;
 
         // HP 바 UI가 연결되었는지 확인
-        if (hpFillImage == null)
+        if (_hpFillImage == null)
         {
             Debug.LogError("PlayerHealth: HP Fill Image가 연결되지 않았습니다. 인스펙터에서 할당해주세요.", this);
         }
@@ -83,12 +85,14 @@ public class PlayerHpManger : MonoBehaviour
     /// </summary>
     private void UpdateHealthUI()
     {
-        if (hpFillImage != null)
+        if (_hpFillImage != null)
         {
             // 현재 체력을 최대 체력으로 나눈 비율로 Fill Amount 설정
-            hpFillImage.fillAmount = (float)_currentHealth / maxHealth;
+            _hpFillImage.fillAmount = (float)_currentHealth / maxHealth;
         }
         // OnHealthChanged?.Invoke(currentHealth); // 이벤트 발생 (선택 사항)
+        
+        _hpText.text =_currentHealth.ToString();
     }
 
     /// <summary>

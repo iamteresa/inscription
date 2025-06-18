@@ -18,7 +18,7 @@ public class CardSelector : MonoBehaviour, IPointerClickHandler
         get { return _selectionInfoText; }
         set { _selectionInfoText = value; }
     }
-
+    
     void Awake()
     {
         cardHover = GetComponent<CardHover>();

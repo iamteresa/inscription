@@ -567,7 +567,6 @@ GameObject:
   - component: {fileID: 2866389606976056128}
   - component: {fileID: 6490902560125159253}
   - component: {fileID: 249643385676603539}
-  - component: {fileID: 4843589267669948637}
   m_Layer: 5
   m_Name: HandCardPrefab
   m_TagString: Untagged
@@ -651,7 +650,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: baa9c95dd37d5b844b30166280ec2969, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardData: {fileID: 0}
   NameText: {fileID: 2797361530855320850}
   SpeciesText: {fileID: 8218549166314533836}
   AttackText: {fileID: 4397765552588362504}
@@ -659,6 +657,7 @@ MonoBehaviour:
   CardImage: {fileID: 3012348057351273062}
   CardSkillImage: {fileID: 2213308596142939412}
   Cost: {fileID: 6523187438891939433}
+  cardData: {fileID: 0}
 --- !u!114 &6490902560125159253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -688,24 +687,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _selectionInfoText: {fileID: 0}
---- !u!114 &4843589267669948637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7793903509410112710}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42714fcf8232b0441b356acb2704d1f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cardData: {fileID: 0}
-  _attackText: {fileID: 4397765552588362504}
-  _healthText: {fileID: 4140512123896262725}
-  _cardImageDisplay: {fileID: 3012348057351273062}
-  _abilityDescriptionText: {fileID: 3223610150227456294}
-  faction: 0
 --- !u!1 &8257328336341322850
 GameObject:
   m_ObjectHideFlags: 0
