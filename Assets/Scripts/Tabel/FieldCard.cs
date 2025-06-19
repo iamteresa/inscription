@@ -1,44 +1,119 @@
 using UnityEngine;
 
 /// <summary>
-/// 전장에 배치된 카드의 데이터를 설정하고, 시각적 표시만 담당합니다.
-/// 체력, 공격력 등 런타임 스탯 관리는 BattleCardManager가 담당합니다.
+/// 전장에 배치된 카드의 데이터를 설정하고,
+/// 데미지나 회복 시 자동으로 CardDisplay를 업데이트합니다.
 /// </summary>
 [RequireComponent(typeof(CardDisplay))]
 public class FieldCard : MonoBehaviour
 {
-    [Header("---------필드 카드 설정---------")]
-    [SerializeField] private CardDisplay cardDisplay;      // 카드 UI 표시용
-    [SerializeField] private CardFaction faction;         // 카드 진영 (플레이어 또는 적)
-
     public enum CardFaction { Player, Enemy }
 
-    /// <summary>
-    /// 카드 데이터를 할당하고, CardDisplay를 업데이트합니다.
-    /// BattleCardManager.RegisterCard는 외부에서 호출해주세요.
-    /// </summary>
-    public void SetCardData(CardData data, CardFaction cardFaction)
+    [Header("FieldCard Settings")]
+    [Tooltip("카드의 진영을 설정하세요.")]
+    public CardFaction faction;
+
+    private CardDisplay cardDisplay;
+    private CardData cardData;
+    private int maxHealth;
+    private int currentHealth;
+    private int attackPower;
+
+    void Awake()
     {
-        if (data == null)
-        {
-            Debug.LogError("FieldCard: 설정할 CardData가 null입니다.", this);
-            return;
-        }
-
-        faction = cardFaction;
-
-        // 카드 UI 갱신
+        cardDisplay = GetComponent<CardDisplay>();
         if (cardDisplay == null)
-            cardDisplay = GetComponent<CardDisplay>();
-
-        cardDisplay.SetCardDisplay(data);
+            Debug.LogError("FieldCard requires a CardDisplay component.", this);
     }
 
     /// <summary>
-    /// BattleCardManager나 외부 시스템이 카드 제거 시 호출합니다.
+    /// 카드 ScriptableObject 데이터를 설정하고,
+    /// 런타임 스탯을 초기화합니다.
+    /// </summary>
+    /// <param name="data">할당할 CardData</param>
+    /// <param name="cardFaction">카드 진영 (Player/Enemy)</param>
+    public void Initialize(CardData data, CardFaction cardFaction)
+    {
+        if (data == null)
+        {
+            Debug.LogError("FieldCard.Initialize: CardData is null.", this);
+            return;
+        }
+
+        cardData = data;
+        faction = cardFaction;
+        maxHealth = data.Health;
+        currentHealth = maxHealth;
+        attackPower = data.Attack;
+
+        RefreshUI();
+    }
+
+    /// <summary>
+    /// 현재 스탯을 UI에 반영합니다.
+    /// </summary>
+    private void RefreshUI()
+    {
+        if (cardData != null)
+        {
+            cardDisplay.SetCardDisplay(cardData);
+        }
+
+        cardDisplay.UpdateStatsDisplay(attackPower, currentHealth);
+    }
+
+    /// <summary>
+    /// 카드에 데미지를 입힙니다.
+    /// </summary>
+    /// <param name="amount">데미지 양</param>
+    public void TakeDamage(int amount)
+    {
+        if (!Application.isPlaying) return;
+
+        currentHealth = Mathf.Max(0, currentHealth - amount);
+        RefreshUI();
+
+        if (currentHealth <= 0)
+        {
+            RemoveFromField();
+        }
+    }
+
+    /// <summary>
+    /// 카드 체력을 회복합니다.
+    /// </summary>
+    /// <param name="amount">회복 양</param>
+    public void Heal(int amount)
+    {
+        if (!Application.isPlaying) return;
+
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        RefreshUI();
+    }
+
+    /// <summary>
+    /// 전장에서 카드를 제거합니다.
+    /// Play 모드에서만 씬 인스턴스를 파괴합니다.
     /// </summary>
     public void RemoveFromField()
     {
+        if (!Application.isPlaying) return;
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// 현재 체력을 반환합니다.
+    /// </summary>
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    /// <summary>
+    /// 공격력을 반환합니다.
+    /// </summary>
+    public int GetAttackPower()
+    {
+        return attackPower;
     }
 }

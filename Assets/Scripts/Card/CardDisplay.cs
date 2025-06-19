@@ -20,7 +20,6 @@ public class CardDisplay : MonoBehaviour
     // 런타임에 CardData를 동적으로 할당하려면 _runtimeCardData를 사용합니다.
     public CardData cardData; // Unity 에디터에서 프리팹에 기본 CardData를 할당할 경우 사용 (옵션)
 
-
     // 런타임에 이 디스플레이가 표시할 실제 CardData를 저장하는 private 필드
     private CardData _runtimeCardData;
 
@@ -88,20 +87,18 @@ public class CardDisplay : MonoBehaviour
             Debug.LogError("CardDisplay: 설정할 CardData가 null입니다.", this);
             return;
         }
-
         _runtimeCardData = data; // 런타임에 이 디스플레이가 참조할 CardData 저장
 
         // 모든 UI 요소 업데이트 (null 체크 필수)
-        if (NameText != null) NameText.text = _runtimeCardData.CardName; // 카드 이름 텍스트 설정
-        if (SpeciesText != null) SpeciesText.text = _runtimeCardData.Species.ToString(); // 종족 텍스트 설정
-        if (Cost != null) Cost.text = _runtimeCardData.Cost.ToString(); // 비용 텍스트 설정
-        if (CardImage != null) CardImage.sprite = _runtimeCardData.CardImage; // 카드 아트워크 이미지 설정
+        if (NameText != null) NameText.text = _runtimeCardData.CardName;                    // 카드 이름 텍스트 설정
+        if (SpeciesText != null) SpeciesText.text = _runtimeCardData.Species.ToString();    // 종족 텍스트 설정
+        if (Cost != null) Cost.text = _runtimeCardData.Cost.ToString();                     // 비용 텍스트 설정
+        if (CardImage != null) CardImage.sprite = _runtimeCardData.CardImage;               // 카드 이미지 설정
 
         // CardSkillImage 처리 (CardData에 SkillImage 필드가 있다면)
         // if (CardSkillImage != null && _runtimeCardData.CardSkillImage != null) CardSkillImage.sprite = _runtimeCardData.CardSkillImage;
-        // else if (CardSkillImage != null) CardSkillImage.gameObject.SetActive(false); // 스킬 이미지가 없으면 비활성화
+        // else if (CardSkillImage != null) CardSkillImage.gameObject.SetActive(false);
 
-        // AttackText와 HealthText는 초기값으로 설정
         if (AttackText != null) AttackText.text = _runtimeCardData.Attack.ToString();
         if (HealthText != null) HealthText.text = _runtimeCardData.Health.ToString();
     }
