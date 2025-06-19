@@ -11,6 +11,7 @@ public class EnemyCardManager : MonoBehaviour
 {
     [Header("----- 적 카드 배치 슬롯(4개) -----")]
     [SerializeField] private List<Transform> enemySpawnPoints = new List<Transform>();
+     public List<Transform> EnemySpawnPoints => enemySpawnPoints;
 
     [Header("----- 필드 카드 프리팹 -----")]
     [SerializeField] private GameObject fieldCardPrefab;

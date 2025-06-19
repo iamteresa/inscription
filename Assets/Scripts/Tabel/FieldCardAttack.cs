@@ -3,47 +3,70 @@ using System.Collections.Generic;
 
 public class FieldCardAttack : MonoBehaviour
 {
-    [Header("← 공격 순서를 관리하는 BattlefieldManager")]
+    [Header("-----------아군 필드 슬롯 관리 매니저-----------")]
     [SerializeField] private BattlefieldManager battlefieldManager;
+    [Header("-----------적 필드 슬롯 관리 매니저---------")]
+    [SerializeField] private EnemyCardManager enemyCardManager;
+    [Header("-----------적 플레이어 HP 매니저------------")]
+    [SerializeField] private PlayerHpManger enemyHpManager;
 
     void Awake()
     {
         if (battlefieldManager == null)
             battlefieldManager = FindObjectOfType<BattlefieldManager>();
+        if (enemyCardManager == null)
+            enemyCardManager = FindObjectOfType<EnemyCardManager>();
+        
     }
 
     void Update()
     {
-        // 예: A 키를 누르면 한 턴 공격을 실행
         if (Input.GetKeyDown(KeyCode.A))
-        {
             AttackLeftToRight();
-        }
     }
 
-    /// <summary>
-    /// 왼쪽(인덱스 0)부터 오른쪽까지 슬롯별로 FieldCard가 있으면
-    /// FieldCard.GetAttackPower()를 호출하여 로그로 찍습니다.
-    /// </summary>
     public void AttackLeftToRight()
     {
-        // BattlefieldManager에 슬롯 리스트를 노출하는 프로퍼티가 필요합니다.
-        // 아래 코드가 컴파일되지 않는다면, BattlefieldManager에
-        //   public List<Transform> SpawnPoints => spawnPoints;
-        // 처럼 접근자(Property)를 추가해주세요.
+        // 1) 아군 슬롯
+        List<Transform> playerSlots = battlefieldManager.SpawnPoints;
+        // 2) 적 슬롯
+        List<Transform> enemySlots = enemyCardManager.EnemySpawnPoints;
 
-        List<Transform> slots = battlefieldManager.SpawnPoints;
-        for (int i = 0; i < slots.Count; i++)
+        for (int i = 0; i < playerSlots.Count; i++)
         {
-            Transform slot = slots[i];
-            if (slot.childCount == 0) continue;
+            // 아군 슬롯, 적 슬롯 길이는 같다고 가정
+            Transform pSlot = playerSlots[i];
+            Transform eSlot = (i < enemySlots.Count ? enemySlots[i] : null);
 
-            GameObject cardGO = slot.GetChild(0).gameObject;
-            FieldCard fc = cardGO.GetComponent<FieldCard>();
-            if (fc != null)
+            if (pSlot == null || pSlot.childCount == 0)
+                continue;
+
+            // 아군 카드
+            var pCardGO = pSlot.GetChild(0).gameObject;
+            var pFC = pCardGO.GetComponent<FieldCard>();
+            if (pFC == null)
+                continue;
+
+            int damage = pFC.GetAttackPower();
+
+            // 적 카드가 있으면 피해
+            if (eSlot != null && eSlot.childCount > 0)
             {
-                int atk = fc.GetAttackPower();
-                Debug.Log($"{i}번 슬롯의 {cardGO.name} → 공격력 {atk}로 공격!");
+                var eCardGO = eSlot.GetChild(0).gameObject;
+                var eFC = eCardGO.GetComponent<FieldCard>();
+                if (eFC != null)
+                {
+                    eFC.TakeDamage(damage);
+                    Debug.Log($"[{i}] {pCardGO.name}→{eCardGO.name} 에 {damage} 데미지");
+                    continue;
+                }
+            }
+
+            // 아니면 적 플레이어에게 직접 데미지
+            if (enemyHpManager != null)
+            {
+                enemyHpManager.TakeDamage(damage);
+                Debug.Log($"[{i}] {pCardGO.name} 가 적 플레이어에게 {damage} 데미지");
             }
         }
     }
