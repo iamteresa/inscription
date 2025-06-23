@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
-  m_Name: Knight
+  m_Name: Tomb
   m_EditorClassIdentifier: 
-  _cardName: Knight
+  _cardName: Tomb
   _species: 1
   _attack: 1
-  _health: 6
+  _health: 4
   _cardImage: {fileID: 0}
-  _cost: 4
+  _cost: 2
   _cardSkillImage: {fileID: 0}
-  _abilityType: 0
+  _abilityType: 6
   _abilityValue: 0
   _abilityDescription: 

@@ -310,10 +310,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battlefieldManager: {fileID: 207031366}
-  enemyCardManager: {fileID: 0}
+  enemyCardManager: {fileID: 207031369}
+  playerHpManager: {fileID: 1979700070}
   enemyHpManager: {fileID: 762615569}
   attackAnimDuration: 0.1
   delayBetweenAttacks: 0.2
+  delayAfterPlayerTurn: 0.5
 --- !u!1 &106676970
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,6 +956,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c5e68429840935d4e89426a0bf742efc, type: 2}
   - {fileID: 11400000, guid: 60e5258d53af7f84e913b03f9e0d756d, type: 2}
   - {fileID: 11400000, guid: 383be888d0ecc70428b5018043b0d596, type: 2}
+  - {fileID: 11400000, guid: 42107e96acdb83441b9f1d61d3723a45, type: 2}
+  - {fileID: 11400000, guid: a84017fa82bd2dc40a831c3cf4c16ab1, type: 2}
   maxHandSize: 7
   cardSpacing: 120
   battlefieldManager: {fileID: 207031366}

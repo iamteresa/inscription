@@ -90,7 +90,7 @@ public class PlayerHpManger : MonoBehaviour
             // 현재 체력을 최대 체력으로 나눈 비율로 Fill Amount 설정
             _hpFillImage.fillAmount = (float)_currentHealth / maxHealth;
         }
-        // OnHealthChanged?.Invoke(currentHealth); // 이벤트 발생 (선택 사항)
+        // OnHealthChanged?.Invoke(_currentHealth); // 이벤트 발생 (선택 사항)
         
         _hpText.text =_currentHealth.ToString();
     }

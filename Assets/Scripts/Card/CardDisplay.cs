@@ -16,7 +16,7 @@ public class CardDisplay : MonoBehaviour
     public Image CardSkillImage; // 기존 CardSkillImage 필드
     public TMP_Text Cost;
 
-    // 이 cardData 필드는 Unity 에디터에서 직접 CardData ScriptableObject를 연결할 때 사용됩니다.
+    // 이 _cardData 필드는 Unity 에디터에서 직접 CardData ScriptableObject를 연결할 때 사용됩니다.
     // 런타임에 CardData를 동적으로 할당하려면 _runtimeCardData를 사용합니다.
     public CardData cardData; // Unity 에디터에서 프리팹에 기본 CardData를 할당할 경우 사용 (옵션)
 
@@ -27,7 +27,7 @@ public class CardDisplay : MonoBehaviour
     {
         //  _runtimeCardData가 우선순위를 가집니다.
         // 만약 Start 시점에 이미 _runtimeCardData가 SetCardDisplay()를 통해 할당되었다면, 그 데이터를 사용합니다.
-        // 그렇지 않고 public cardData 필드가 할당되어 있다면 그것을 사용합니다.
+        // 그렇지 않고 public _cardData 필드가 할당되어 있다면 그것을 사용합니다.
         // 둘 다 없다면 경고를 띄웁니다.
         if (_runtimeCardData != null)
         {
@@ -47,7 +47,7 @@ public class CardDisplay : MonoBehaviour
     }
 
     /// <summary>
-    /// 기존 UpdateDisplay 메서드. public cardData 필드를 사용하여 UI를 업데이트합니다.
+    /// 기존 UpdateDisplay 메서드. public _cardData 필드를 사용하여 UI를 업데이트합니다.
     /// </summary>
     public void UpdateDisplay()
     {
@@ -128,7 +128,7 @@ public class CardDisplay : MonoBehaviour
     /// <returns>현재 CardData</returns>
     public CardData GetCardData()
     {
-        // 런타임 데이터가 있다면 그것을 반환, 없으면 public으로 연결된 cardData 반환
+        // 런타임 데이터가 있다면 그것을 반환, 없으면 public으로 연결된 _cardData 반환
         return _runtimeCardData != null ? _runtimeCardData : cardData;
     }
 }

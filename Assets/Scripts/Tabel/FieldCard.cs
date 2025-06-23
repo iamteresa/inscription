@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(CardDisplay))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(PlayerCostManager))]
 public class FieldCard : MonoBehaviour
 {
     public enum CardFaction { Player, Enemy }
@@ -15,21 +16,22 @@ public class FieldCard : MonoBehaviour
     [Tooltip("카드의 진영을 설정하세요.")]
     public CardFaction faction;
 
-    private CardDisplay cardDisplay;
-    private Animator animator;
-    private CardData cardData;
-    private int maxHealth;
-    private int currentHealth;
-    private int attackPower;
+    private CardDisplay _cardDisplay;
+    private Animator _animator;
+    private CardData _cardData;
+    private PlayerCostManager _playerCostManager;
+    private int _maxHealth;
+    private int _currentHealth;
+    private int _attackPower;
 
     void Awake()
     {
-        cardDisplay = GetComponent<CardDisplay>();
-        if (cardDisplay == null)
+        _cardDisplay = GetComponent<CardDisplay>();
+        if (_cardDisplay == null)
             Debug.LogError("FieldCard requires a CardDisplay component.", this);
 
-        animator = GetComponent<Animator>();
-        if (animator == null)
+        _animator = GetComponent<Animator>();
+        if (_animator == null)
             Debug.LogWarning("FieldCard: Animator 컴포넌트가 없습니다. Hited 애니메이션이 동작하지 않습니다.", this);
     }
 
@@ -43,12 +45,13 @@ public class FieldCard : MonoBehaviour
             Debug.LogError("FieldCard.Initialize: CardData is null.", this);
             return;
         }
+       
 
-        cardData = data;
+        _cardData = data;
         faction = cardFaction;
-        maxHealth = data.Health;
-        currentHealth = maxHealth;
-        attackPower = data.Attack;
+        _maxHealth = data.Health;
+        _currentHealth = _maxHealth;
+        _attackPower = data.Attack;
 
         RefreshUI();
     }
@@ -58,10 +61,10 @@ public class FieldCard : MonoBehaviour
     /// </summary>
     private void RefreshUI()
     {
-        if (cardData != null)
-            cardDisplay.SetCardDisplay(cardData);
+        if (_cardData != null)
+            _cardDisplay.SetCardDisplay(_cardData);
 
-        cardDisplay.UpdateStatsDisplay(attackPower, currentHealth);
+        _cardDisplay.UpdateStatsDisplay(_attackPower, _currentHealth);
     }
 
     /// <summary>
@@ -72,17 +75,23 @@ public class FieldCard : MonoBehaviour
     {
         if (!Application.isPlaying) return;
 
-        currentHealth = Mathf.Max(0, currentHealth - amount);
+        _currentHealth = Mathf.Max(0, _currentHealth - amount);
         RefreshUI();
 
-        if (animator != null)
+        if (_animator != null)
         {
-            animator.ResetTrigger("Hited");
-            animator.SetTrigger("Hited");
+            _animator.ResetTrigger("Hited");
+            _animator.SetTrigger("Hited");
         }
 
-        if (currentHealth <= 0)
+        if (_currentHealth <= 0)
+        {
             RemoveFromField();
+            
+        }
+            
+
+
     }
 
     /// <summary>
@@ -92,7 +101,7 @@ public class FieldCard : MonoBehaviour
     {
         if (!Application.isPlaying) return;
 
-        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
         RefreshUI();
     }
 
@@ -106,7 +115,7 @@ public class FieldCard : MonoBehaviour
     }
 
     /// <summary>현재 체력을 반환합니다.</summary>
-    public int GetCurrentHealth() => currentHealth;
+    public int GetCurrentHealth() => _currentHealth;
     /// <summary>공격력을 반환합니다.</summary>
-    public int GetAttackPower() => attackPower;
+    public int GetAttackPower() => _attackPower;
 }

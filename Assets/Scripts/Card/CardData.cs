@@ -16,6 +16,7 @@ public class CardData : ScriptableObject
         Unknown         //미상
     }
 
+    
     // --- 카드 능력 타입 Enum  ---
     public enum CardAbilityType
     {

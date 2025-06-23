@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // Text 사용 시 필요
@@ -17,6 +18,12 @@ public class PlayerCostManager : MonoBehaviour
     private void Start()
     {
         UpdateCostUI();
+    }
+    // 카드가 죽을 때 호출됨
+    public void OnCardDeath(string faction)
+    {
+        int gainAmount = (faction == "Savage") ? 2 : 1;
+        GainCost(gainAmount);
     }
 
     public void GainCost(int amount)
@@ -55,5 +62,10 @@ public class PlayerCostManager : MonoBehaviour
         {
             costText.text = $"[ {currentCost} / {maxCost} ]";
         }
+    }
+
+    internal void OnCardDeath(FieldCard.CardFaction faction)
+    {
+        throw new NotImplementedException();
     }
 }
