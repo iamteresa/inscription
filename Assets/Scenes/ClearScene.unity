@@ -822,7 +822,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8942a47d11ce8442b83aa76501b9ed3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameSceneName: SampleScene
+  gameSceneName: MainMenu
   restartButton: {fileID: 1788628904}
 --- !u!4 &1946008393
 Transform:

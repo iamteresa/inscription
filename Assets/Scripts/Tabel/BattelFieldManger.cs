@@ -53,7 +53,8 @@ public class BattlefieldManager : MonoBehaviour
 
         // 3. 'placementInfoText' UI 요소 연결 확인
         if (placementInfoText == null)
-            Debug.LogError("Placement Info Text가 연결되지 않았습니다. UI Canvas의 TextMeshProUGUI 요소를 연결해주세요.", this);
+            Debug.LogError("Placement Info Text가 연결되지 않았습니다. " +
+                "UI Canvas의 TextMeshProUGUI 요소를 연결해주세요.", this);
 
         // 4. 초기 상태 설정
         // 게임 시작 시 배치 정보 UI를 숨깁니다.
@@ -79,7 +80,7 @@ public class BattlefieldManager : MonoBehaviour
                 // 해당 'spawnPoint'가 인스펙터에서 비어있을 경우 경고를 로깅하고 건너뜁니다.
                 Debug.LogWarning($"SpawnPoints[{i}]가 인스펙터에서 비어있습니다. 해당 슬롯은 사용되지 않습니다.");
                 occupiedSpawnPoints[i] = null; // 해당 슬롯은 점유되지 않은 것으로 초기 상태를 표시합니다.
-                continue; // 다음 반복으로 넘어갑니다.
+                continue; 
             }
 
             var slotGO = slotTransform.gameObject; // Transform에서 GameObject 가져오기
@@ -142,14 +143,14 @@ public class BattlefieldManager : MonoBehaviour
     /// <param name="clickedSlotIndex">클릭된 필드 슬롯의 고유 인덱스입니다.</param>
     public void OnSlotClicked(int clickedSlotIndex)
     {
-        // 1. 배치 대기 중인 카드가 있는지 확인합니다.
+        // 1. 배치 대기 중인 카드가 있는지 확인합니다.===================================================================
         if (cardWaitingForPlacement == null)
         {
             ShowPlacementInfo("먼저 손패에서 카드를 선택하세요!"); // 카드를 선택하지 않았다면 메시지 표시
             return; // 이후 로직을 실행하지 않고 함수를 종료합니다.
         }
 
-        // 2. 클릭된 슬롯 인덱스의 유효성을 검사합니다.
+        // 2. 클릭된 슬롯 인덱스의 유효성을 검사합니다.=================================================================
         // 인덱스가 유효한 범위 내에 있고, 해당 'spawnPoint'가 실제로 존재하는지 확인합니다.
         if (clickedSlotIndex < 0 || clickedSlotIndex >= spawnPoints.Count || spawnPoints[clickedSlotIndex] == null)
         {
@@ -158,25 +159,26 @@ public class BattlefieldManager : MonoBehaviour
             return;
         }
 
-        // 3. 해당 슬롯이 이미 다른 카드로 점유되어 있는지 확인합니다.
+        // 3. 해당 슬롯이 이미 다른 카드로 점유되어 있는지 확인합니다.==================================================
         if (occupiedSpawnPoints[clickedSlotIndex] != null)
         {
             ShowPlacementInfo("이미 다른 카드가 있습니다!"); // 슬롯이 이미 차있다면 메시지 표시
             return;
         }
 
-        // 4. 배치 대기 중인 카드로부터 'CardDisplay' 컴포넌트와 'CardData'를 가져옵니다.
+        // 4. 배치 대기 중인 카드로부터 'CardDisplay' 컴포넌트와 'CardData'를 가져옵니다.==============================
         // 손패 카드는 'CardDisplay' 컴포넌트만 가지고 있고, 그 안에 'CardData'가 저장되어 있다고 가정합니다.
         var originalDisplay = cardWaitingForPlacement.GetComponent<CardDisplay>();
         if (originalDisplay == null || originalDisplay.GetCardData() == null) // 'GetCardData()' 메서드를 사용하여 'CardData'를 가져옵니다.
         {
-            Debug.LogError("CardDisplay 또는 CardData가 손패 카드에 없습니다. 손패 카드의 설정 및 데이터 할당을 확인하세요.", cardWaitingForPlacement);
+            Debug.LogError("CardDisplay 또는 CardData가 손패 카드에 없습니다. " +
+                "손패 카드의 설정 및 데이터 할당을 확인하세요.", cardWaitingForPlacement);
             ClearCardWaitingForPlacement(); // 오류 발생 시 배치 대기 상태 해제
             return;
         }
         CardData cardDataToPlay = originalDisplay.GetCardData(); // 실제 필드에 소환할 카드의 데이터를 가져옵니다.
 
-        // 5. 카드 소환에 필요한 코스트(자원)를 확인합니다.
+        // 5. 카드 소환에 필요한 코스트(자원)를 확인합니다.=============================================================
         int cost = cardDataToPlay.Cost; // 'CardData'에 정의된 카드의 비용을 가져옵니다.
         if (playerCostManager == null)
         {
@@ -192,21 +194,21 @@ public class BattlefieldManager : MonoBehaviour
             return;
         }
 
-        // 6. 플레이어의 코스트를 소모합니다.
+        // 6. 플레이어의 코스트를 소모합니다.============================================================================
         if (!playerCostManager.RemoveCost(cost)) // 'PlayerCostManager'를 통해 코스트를 소모 시도
         {
             ShowPlacementInfo("코스트 소모 중 오류가 발생했습니다!"); // 코스트 소모 실패 시 메시지 표시
             return;
         }
 
-        // --- 여기부터는 카드 배치에 성공했을 때의 핵심 게임 로직입니다. ---
+        // --- 여기부터는 카드 배치에 성공했을 때의 로직입니다. ---
 
-        // 1) 'fieldCardPrefab'을 인스턴스화하여 필드에 새로운 카드 오브젝트를 생성합니다.
+        // 1) 'fieldCardPrefab'을 인스턴스화하여 필드에 새로운 카드 오브젝트를 생성합니다.===================================
         // 'spawnPoints[clickedSlotIndex]'를 부모 Transform으로 설정하여 해당 슬롯의 위치에 생성합니다.
         // 'false'는 Instantiate 시 월드 공간에서의 회전과 크기를 유지하지 않고, 부모에 상대적으로 설정함을 의미합니다 (UI 요소에 적합).
         var newFieldCardGO = Instantiate(fieldCardPrefab, spawnPoints[clickedSlotIndex], false);
 
-        // 2) 새로 생성된 필드 카드의 'FieldCard' 컴포넌트를 가져와 초기화합니다.
+        // 2) 새로 생성된 필드 카드의 'FieldCard' 컴포넌트를 가져와 초기화합니다.==========================================
         // 'fieldCardPrefab'에는 'FieldCard.cs' 스크립트가 미리 부착되어 있어야 합니다.
         FieldCard newFieldCard = newFieldCardGO.GetComponent<FieldCard>();
         if (newFieldCard != null)
@@ -215,6 +217,7 @@ public class BattlefieldManager : MonoBehaviour
             // 이 카드('newFieldCard')의 진영을 플레이어 진영으로 설정합니다.
             newFieldCard.Initialize(cardDataToPlay, FieldCard.CardFaction.Player);
             // 카드가 필드에 소환되었을 때 발동하는 능력(예: 전함)을 처리하는 메서드를 호출합니다.
+            
 
         }
         else
@@ -226,7 +229,7 @@ public class BattlefieldManager : MonoBehaviour
             return;
         }
 
-        // 3) 슬롯별 Transform 적용 (만약 'BattlefieldSlot'에 커스텀 배치 로직이 있다면)
+        // 3) 슬롯별 Transform 적용 (만약 'BattlefieldSlot'에 커스텀 배치 로직이 있다면)=====================================
         // 'newFieldCardGO'가 UI 요소(Canvas의 자식)라면 'RectTransform'이 필요합니다.
         var fieldRect = newFieldCardGO.GetComponent<RectTransform>();
         var slotComp = spawnPoints[clickedSlotIndex].GetComponent<BattlefieldSlot>();
@@ -235,10 +238,10 @@ public class BattlefieldManager : MonoBehaviour
             // 카드의 위치나 크기를 슬롯에 맞게 조정합니다.
             slotComp.ApplyPlacementTransform(fieldRect);
 
-        // 4) 'occupiedSpawnPoints' 배열에 새로 배치된 필드 카드 GameObject를 등록하여 슬롯이 점유되었음을 표시합니다.
+        // 4) 'occupiedSpawnPoints' 배열에 새로 배치된 필드 카드 GameObject를 등록하여 슬롯이 점유되었음을 표시합니다.=====
         occupiedSpawnPoints[clickedSlotIndex] = newFieldCardGO;
 
-        // 5) 손패에 있던 원본 카드 제거 및 'HandManager'에 배치 성공 알림
+        // 5) 손패에 있던 원본 카드 제거 및 'HandManager'에 배치 성공 알림=================================================
         // 'handManager'가 유효한지 확인합니다.
         if (handManager != null)
             // 'HandManager'의 'NotifyCardPlacedSuccessfully' 메서드를 호출하여,

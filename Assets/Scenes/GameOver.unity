@@ -180,7 +180,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uBC84\uD2BC\uC744 \uB20C\uB7EC \uC7AC\uC2DC\uC791"
+  m_text: "\uBA54\uC778\uBA54\uB274\uB85C..."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: d4618087261b8f24d8a5f4caa7391580, type: 2}
   m_sharedMaterial: {fileID: -8416285251660365611, guid: d4618087261b8f24d8a5f4caa7391580, type: 2}
@@ -286,7 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8942a47d11ce8442b83aa76501b9ed3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameSceneName: SampleScene
+  gameSceneName: MainMenu
   restartButton: {fileID: 961479108}
 --- !u!4 &680400882
 Transform:

@@ -93,6 +93,7 @@ public class FieldCard : MonoBehaviour
 
 
     }
+        
 
     /// <summary>
     /// 카드 체력을 회복합니다.

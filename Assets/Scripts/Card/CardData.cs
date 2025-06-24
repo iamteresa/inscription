@@ -35,7 +35,7 @@ public class CardData : ScriptableObject
         None,        //없음
         
     }
-
+    
     [Header("------- 카드 스탯 목록 ---------")]
     [SerializeField] string _cardName;
     [SerializeField] CardSpecies _species;

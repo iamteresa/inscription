@@ -18,7 +18,7 @@ MonoBehaviour:
   _health: 4
   _cardImage: {fileID: 0}
   _cost: 4
-  _cardSkillImage: {fileID: 0}
+  _cardSkillImage: {fileID: 21300000, guid: 6960c6bd5088317429f7e0e033bee813, type: 3}
   _abilityType: 1
   _abilityValue: 0
   _abilityDescription: 
