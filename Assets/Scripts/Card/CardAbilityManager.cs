@@ -5,24 +5,41 @@ public class CardAbilityManager : MonoBehaviour
 {
     public static CardAbilityManager Instance { get; private set; }
 
-    void Awake()
+    void Awake() => Instance = this;
+
+    public void RegisterAll(FieldCard card, CardData data)
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        // 종족 능력
+        IAbility speciesAb = CreateSpeciesAbility(data.Species);
+        if (speciesAb != null)
+        {
+            speciesAb.Initialize(card, data);
+            card.RegisterAbility(speciesAb);
+        }
+
+        // 스킬 능력
+        IAbility skillAb = CreateAbility(data.AbilityType);
+        if (skillAb != null)
+        {
+            skillAb.Initialize(card, data);
+            card.RegisterAbility(skillAb);
+        }
     }
 
-    /// <summary>
-    /// FieldCard.Initialize 직후에 호출하세요.
-    /// </summary>
-    public void RegisterAbilities(FieldCard card, CardData data)
+    IAbility CreateSpeciesAbility(CardData.CardSpecies s)
     {
-        if (data.AbilityType == CardData.CardAbilityType.None) return;
-
-        IAbility ability = CreateAbility(data.AbilityType);
-        if (ability == null) return;
-
-        ability.Initialize(card, data);
-       // card.RegisterAbility(ability);
+        switch (s)
+        {
+            case CardData.CardSpecies.Beast: return new BeastSpeciesAbility();
+            case CardData.CardSpecies.Undead: return new UndeadSpeciesAbility();
+            case CardData.CardSpecies.Machine: return new MachineSpeciesAbility();
+            case CardData.CardSpecies.Zombie: return new ZombieSpeciesAbility();
+            case CardData.CardSpecies.Vampire: return new VampireSpeciesAbility();
+            case CardData.CardSpecies.Dragon: return new DragonSpeciesAbility();
+            case CardData.CardSpecies.Savage: return new SavageSpeciesAbility();
+            //나머지 종족은 필요 시 추가...
+            default: return null;
+        }
     }
 
     IAbility CreateAbility(CardData.CardAbilityType t)
@@ -32,8 +49,7 @@ public class CardAbilityManager : MonoBehaviour
             //case CardData.CardAbilityType.Lifesteal: return new LifestealAbility();
             //case CardData.CardAbilityType.Deathrattle: return new DeathrattleAbility();
             //case CardData.CardAbilityType.Revenger: return new RevengerAbility();
-            //case CardData.CardAbilityType.Poisoner: return new PoisonerAbility();
-            // case … 나머지 능력들 구현 …
+            //// 나머지 추가 능력도 동일 패턴으로…
             default: return null;
         }
     }

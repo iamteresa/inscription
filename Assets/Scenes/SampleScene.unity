@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 53242553}
   - component: {fileID: 53242554}
   - component: {fileID: 53242555}
+  - component: {fileID: 53242556}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -316,6 +317,18 @@ MonoBehaviour:
   attackAnimDuration: 0.1
   delayBetweenAttacks: 0.2
   delayAfterPlayerTurn: 0.5
+--- !u!114 &53242556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53242550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fa6939884e480d48b9194f7a1d87174, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &106676970
 GameObject:
   m_ObjectHideFlags: 0

@@ -30,7 +30,7 @@ public class CardData : ScriptableObject
         Lifesteal,   //체력 흡수 : 공격한 데미지만큼 체력 회복
         Deathrattle, //죽음의 메아리 : 사망시 상대방 카드 10데미지
         Revenger,    //복수자 : 공격 받을시 상대방에게 1데미지
-        Poisoner,    //독살자 : 공격한 적 2턴간 1뎀 + 공격 1 감소
+        Poisoner,    //독살자 : 자기 앞의 적의 공격력을 1 낮춤.
         Weaker,      //나약한자 : 공격력이 턴당 2씩 감소함. (최소 1)
         None,        //없음
         
