@@ -20,7 +20,62 @@ public class BattlefieldManager : MonoBehaviour
     [SerializeField] private PlayerCostManager playerCostManager;
     [SerializeField] private HandManager handManager;
 
- 
+
+
+    /// <summary>
+    /// 주어진 카드 GameObject가 현재 어느 슬롯에 배치되어 있는지 인덱스를 반환합니다.
+    /// 없으면 -1 반환.
+    /// </summary>
+    public int GetSlotIndex(GameObject cardGO)
+    {
+        for (int i = 0; i < occupiedSpawnPoints.Length; i++)
+        {
+            if (occupiedSpawnPoints[i] == cardGO)
+                return i;
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// 외부에서 “슬롯 i에 카드 GO가 들어갔습니다” 라고 알려줄 때 사용합니다.
+    /// GoblinRoad 같은 Ability에서 소환한 카드도 이 메서드를 통해 등록해 주세요.
+    /// </summary>
+    public void RegisterCardAtSlot(int slotIndex, GameObject cardGO)
+    {
+        if (slotIndex >= 0 && slotIndex < occupiedSpawnPoints.Length)
+            occupiedSpawnPoints[slotIndex] = cardGO;
+        else
+            Debug.LogWarning($"RegisterCardAtSlot: 유효하지 않은 인덱스 {slotIndex}");
+    }
+    // 기존 occupiedSpawnPoints와 spawnPoints를 사용해서
+    // fromIndex 위치의 카드를 toIndex 위치로 옮겨보고
+    // 성공하면 true, 실패하면 false 반환
+    public bool TryMoveTo(int fromIndex, int toIndex, GameObject cardGO)
+    {
+        // 유효한 인덱스 검사
+        if (fromIndex < 0 || fromIndex >= occupiedSpawnPoints.Length
+         || toIndex < 0 || toIndex >= occupiedSpawnPoints.Length)
+            return false;
+
+        // 옮기려는 카드랑 배열이 일치하는지 확인
+        if (occupiedSpawnPoints[fromIndex] != cardGO)
+            return false;
+
+        // 목표 슬롯이 비어있는지 확인
+        if (occupiedSpawnPoints[toIndex] != null)
+            return false;
+
+        // 실제 이동: 부모 Transform 교체
+        cardGO.transform.SetParent(spawnPoints[toIndex], false);
+
+        // occupiedSpawnPoints 배열 갱신
+        occupiedSpawnPoints[toIndex] = cardGO;
+        occupiedSpawnPoints[fromIndex] = null;
+
+        return true;
+    }
+
+
     // 'spawnPoints' 리스트의 각 인덱스에 해당하는 슬롯에 어떤 카드 GameObject가 현재 배치되어 있는지
     // (점유하고 있는지) 추적하는 배열입니다.
     private GameObject[] occupiedSpawnPoints;
@@ -104,6 +159,7 @@ public class BattlefieldManager : MonoBehaviour
         StopAllCoroutines(); // 이 스크립트에서 현재 실행 중인 모든 코루틴(이전의 'HidePlacementInfoAfterDelay')을 중지합니다.
         StartCoroutine(HidePlacementInfoAfterDelay(3f)); // 3초 후에 UI를 숨기는 코루틴을 새로 시작합니다.
     }
+
 
     /// <summary>
     /// 지정된 'delay' 시간만큼 대기한 후, 'placementInfoText' UI를 숨기는 코루틴입니다.

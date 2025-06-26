@@ -13,6 +13,7 @@ public class EnemyCardManager : MonoBehaviour
     [SerializeField] private List<Transform> enemySpawnPoints = new List<Transform>();
      public List<Transform> EnemySpawnPoints => enemySpawnPoints;
 
+
     [Header("----- 필드 카드 프리팹 -----")]
     [SerializeField] private GameObject fieldCardPrefab;
 
@@ -27,7 +28,28 @@ public class EnemyCardManager : MonoBehaviour
 
     // 슬롯 점유 상태 추적용
     private GameObject[] occupiedEnemySlots;
+    // (필요하다면 슬롯 점유 상태를 추적하는 배열을 만들어 쓰셔도 좋습니다.)
+    // private GameObject[] _occupiedSlots;
 
+    // 생략된 Awake() 등 초기화 로직이 있다면 그대로 두세요.
+
+    /// <summary>
+    /// 이 GameObject가 어느 슬롯(인덱스)에 배치되어 있는지 반환합니다.
+    /// 없으면 -1 반환.
+    /// </summary>
+    public int GetSlotIndex(GameObject cardGO)
+    {
+        for (int i = 0; i < EnemySpawnPoints.Count; i++)
+        {
+            var slot = EnemySpawnPoints[i];
+            if (slot == null) continue;
+
+            // 자식으로 카드가 붙어있고, 그 카드가 찾고자 하는 cardGO 일 때
+            if (slot.childCount > 0 && slot.GetChild(0).gameObject == cardGO)
+                return i;
+        }
+        return -1;
+    }
     void Awake()
     {
         if (enemySpawnPoints == null || enemySpawnPoints.Count == 0)

@@ -1,6 +1,5 @@
 using UnityEngine;
-using System.Collections.Generic;  // List<T> 사용
-// (Animator, CardDisplay 등 RequireComponent는 그대로 두셔도 됩니다)
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CardDisplay))]
 [RequireComponent(typeof(Animator))]
@@ -19,9 +18,8 @@ public class FieldCard : MonoBehaviour
     private int _currentHealth;
     private int _attackPower;
 
-    // ● 능력(Ability) 인스턴스들을 보관할 리스트
+    // 붙어 있는 IAbility 인스턴스들
     private List<IAbility> _abilities = new List<IAbility>();
- 
 
     void Awake()
     {
@@ -31,11 +29,12 @@ public class FieldCard : MonoBehaviour
 
         _animator = GetComponent<Animator>();
         if (_animator == null)
-            Debug.LogWarning("FieldCard: Animator 컴포넌트가 없습니다. Hited 애니메이션이 동작하지 않습니다.", this);
+            Debug.LogWarning("FieldCard: Animator 컴포넌트가 없습니다. Hited 애니메이션 동작 불가.", this);
     }
 
     /// <summary>
     /// 카드 ScriptableObject 데이터를 설정하고 런타임 스탯을 초기화합니다.
+    /// 반드시 소환 직후 호출해야 합니다.
     /// </summary>
     public void Initialize(CardData data, CardFaction cardFaction)
     {
@@ -53,21 +52,23 @@ public class FieldCard : MonoBehaviour
 
         RefreshUI();
 
-        // ● 능력(Ability) 등록
+        // 1) 능력 등록
         CardAbilityManager.Instance.RegisterAll(this, _cardData);
 
-        Debug.Log($"[RegisterAll] 종족: {data.Species}, 스킬: {data.AbilityType}");
+        // 2) 소환 이벤트 발행
+        CardEventBus.Summon(this);
+
+        Debug.Log($"[RegisterAll] 종족: {_cardData.Species}, 스킬: {_cardData.AbilityType}");
     }
 
     /// <summary>
-    /// 외부에서 AbilityFactory가 호출하여, 실제 인스턴스를 추가할 때 사용합니다.
+    /// CardAbilityManager가 생성한 IAbility 인스턴스를 여기에 추가합니다.
     /// </summary>
     public void RegisterAbility(IAbility ability)
     {
         if (ability != null)
             _abilities.Add(ability);
     }
-
 
     /// <summary>
     /// 현재 스탯을 UI에 반영합니다.
@@ -76,56 +77,82 @@ public class FieldCard : MonoBehaviour
     {
         if (_cardData != null)
             _cardDisplay.SetCardDisplay(_cardData);
-
         _cardDisplay.UpdateStatsDisplay(_attackPower, _currentHealth);
     }
 
     /// <summary>
-    /// 카드에 데미지를 입힙니다. Hited 애니메이션을 재생하고,
-    /// 체력이 0 이하면 필드에서 제거하기 전 Ability 정리.
+    /// 이 카드로 target을 공격하는 메서드입니다.
+    /// 외부에서 호출하거나, FieldCardAttack에서 사용하세요.
+    /// </summary>
+    public void AttackTarget(FieldCard target)
+    {
+        // 공격 이벤트 발행
+        CardEventBus.Attack(this, target);
+
+        if (target != null)
+            target.TakeDamage(_attackPower);
+    }
+
+    /// <summary>
+    /// 카드가 amount만큼 데미지를 입습니다.
     /// </summary>
     public void TakeDamage(int amount)
     {
         if (!Application.isPlaying) return;
 
+        // 피격 이벤트 발행
+        CardEventBus.Damaged(this, amount);
+
         _currentHealth = Mathf.Max(0, _currentHealth - amount);
         RefreshUI();
 
-        // Hited 애니메이션
+        // Hited 애니메이션 트리거
         if (_animator != null)
         {
             _animator.ResetTrigger("Hited");
             _animator.SetTrigger("Hited");
         }
 
-        // 수정된 FieldCard.TakeDamage 내 죽음 처리 부분:
+        // 사망 처리
         if (_currentHealth <= 0)
         {
-            // ▶ 올바르게 이벤트 발행하기
-            //CardEventBus.Death(this);
+            // 사망 이벤트 발행 (CardData 함께)
             CardEventBus.Death(this, _cardData);
-            // 등록된 Ability 해제
+
+            // 능력 정리
             foreach (var ab in _abilities)
                 ab.Cleanup();
-            Debug.Log("Death event fired for " + this.name);
-            
+
+            Debug.Log($"Death event fired for {name}");
             RemoveFromField();
         }
     }
 
     /// <summary>
-    /// 카드 체력을 회복합니다.
+    /// 카드가 amount만큼 체력을 회복합니다.
     /// </summary>
     public void Heal(int amount)
     {
         if (!Application.isPlaying) return;
+
+        // 회복 이벤트 발행
+        CardEventBus.Heal(this, amount);
 
         _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
         RefreshUI();
     }
 
     /// <summary>
-    /// 전장에서 카드를 제거합니다. Play 모드에서만 파괴됩니다.
+    /// 공격력을 외부에서 갱신할 수 있도록 허용합니다.
+    /// </summary>
+    public void SetAttackPower(int newAttack)
+    {
+        _attackPower = Mathf.Max(0, newAttack);
+        _cardDisplay.UpdateStatsDisplay(_attackPower, _currentHealth);
+    }
+
+    /// <summary>
+    /// 전장에서 카드를 제거합니다.
     /// </summary>
     public void RemoveFromField()
     {
@@ -135,6 +162,7 @@ public class FieldCard : MonoBehaviour
 
     /// <summary>현재 체력을 반환합니다.</summary>
     public int GetCurrentHealth() => _currentHealth;
+
     /// <summary>공격력을 반환합니다.</summary>
     public int GetAttackPower() => _attackPower;
 }

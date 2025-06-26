@@ -24,10 +24,10 @@ public class CardData : ScriptableObject
         Mover,       //이동   : 공격 후 오른쪽 이동. 이동 불가시 왼쪽 이동
         Defender,    //수비   : 적의 공수 공격을 막음
         Flyer,       //공수   : 상대편 카드를 무시하고 적 플레이어 공격
-        Diver,       //잠수   : 상대편 카드의 공격을 무시함
+        Diver,       //잠수   : 상대편 카드의 공격을 무시함(적과 플레이어를 직접 공격하게 함)
         GoblinRoad,  //고블린 로드 : 카드 소환시 양 옆에 고블린 카드 소환
         Tomb,        //무덤   : 카드 소환시 양 옆에 해골카드 소환
-        Lifesteal,   //체력 흡수 : 공격한 데미지만큼 체력 회복
+        Lifesteal,   //체력 흡수 : 공격시 적 또는 플레이어의 체력 3 회복
         Deathrattle, //죽음의 메아리 : 사망시 상대방 카드 10데미지
         Revenger,    //복수자 : 공격 받을시 상대방에게 1데미지
         Poisoner,    //독살자 : 자기 앞의 적의 공격력을 1 낮춤.
@@ -45,10 +45,10 @@ public class CardData : ScriptableObject
     [SerializeField] int _cost;
     [SerializeField] Sprite _cardSkillImage;
 
-    [Header("------- 카드 능력 ---------")] // 능력 관련 필드 추가
+    [Header("------- 카드 능력 ---------")]             // 능력 관련 필드 추가
     [SerializeField] CardAbilityType _abilityType = CardAbilityType.None; // 기본값은 능력 없음
-    [SerializeField] int _abilityValue; // 능력에 따라 필요한 추가 값 (예: 데미지 양, 회복량, 드로우 수 등)
-    [SerializeField] string _abilityDescription; // 능력에 대한 설명 텍스트 (UI 표시용)
+    [SerializeField] int _abilityValue;                 // 능력에 따라 필요한 추가 값 (예: 데미지 양, 회복량, 드로우 수 등)
+    [SerializeField] string _abilityDescription;        // 능력에 대한 설명 텍스트 (UI 표시용)
 
     public string CardName => _cardName;
     public CardSpecies Species => _species;
