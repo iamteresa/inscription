@@ -20,14 +20,10 @@ public class FieldCardAttack : MonoBehaviour
 
     void Awake()
     {
-        if (battlefieldManager == null)
-            battlefieldManager = FindObjectOfType<BattlefieldManager>();
-        if (enemyCardManager == null)
-            enemyCardManager = FindObjectOfType<EnemyCardManager>();
-        if (playerHpManager == null)
-            playerHpManager = FindObjectOfType<PlayerHpManger>();
-        if (enemyHpManager == null)
-            enemyHpManager = FindObjectOfType<PlayerHpManger>();
+        battlefieldManager = battlefieldManager ?? FindObjectOfType<BattlefieldManager>();
+        enemyCardManager = enemyCardManager ?? FindObjectOfType<EnemyCardManager>();
+        playerHpManager = playerHpManager ?? FindObjectOfType<PlayerHpManger>();
+        enemyHpManager = enemyHpManager ?? FindObjectOfType<PlayerHpManger>();
     }
 
     void Update()
@@ -50,19 +46,32 @@ public class FieldCardAttack : MonoBehaviour
 
             var pGO = pSlot.GetChild(0).gameObject;
             var pFC = pGO.GetComponent<FieldCard>();
-            if (pFC == null) continue;
+            if (pFC == null)
+                continue;
 
-            // (A) 아군 Attack 애니메이션
+            // (A) 공격 애니메이션 재생
             var pAnim = pGO.GetComponent<Animator>();
             if (pAnim != null)
             {
                 pAnim.ResetTrigger("Attack");
                 pAnim.SetTrigger("Attack");
             }
-
             yield return new WaitForSeconds(attackAnimDuration);
 
-            // (B) 타격 대상 찾기
+            // (B) 공격력 읽기
+            int dmg = pFC.GetAttackPower();
+
+            // (C) Flyer 능력: 적 슬롯 검사 없이 적 플레이어만 관통 피해
+            if (pFC.AbilityType == CardData.CardAbilityType.Flyer)
+            {
+                CardEventBus.Attack(pFC, null);
+                enemyHpManager.TakeDamage(dmg);
+                Debug.Log($"[플라이어 관통] {pGO.name} → 적 플레이어에 {dmg} 데미지");
+                yield return new WaitForSeconds(delayBetweenAttacks);
+                continue;
+            }
+
+            // (D) 일반 타겟(슬롯 i)에서 FieldCard 찾기
             FieldCard targetFC = null;
             GameObject targetGO = null;
             if (i < enemySlots.Count)
@@ -75,14 +84,20 @@ public class FieldCardAttack : MonoBehaviour
                 }
             }
 
-            int dmg = pFC.GetAttackPower();
+            // (E) Diver 능력: 방어자가 Diver면 피해를 무시하고 플레이어 관통
+            if (targetFC != null && targetFC.AbilityType == CardData.CardAbilityType.Diver)
+            {
+                CardEventBus.Attack(pFC, null);
+                enemyHpManager.TakeDamage(dmg);
+                Debug.Log($"[다이버 관통] {pGO.name} → 적 플레이어에 {dmg} 데미지");
+                yield return new WaitForSeconds(delayBetweenAttacks);
+                continue;
+            }
 
-            // ────────────────────────────────────────────────────
-            // ▶ OnAttack 이벤트 호출 (공격자, 방어자(null 가능))
+            // (F) OnAttack 이벤트 발행
             CardEventBus.Attack(pFC, targetFC);
-            // ────────────────────────────────────────────────────
 
-            // (C) 실제 데미지 적용
+            // (G) 실제 데미지 적용
             if (targetFC != null)
             {
                 targetFC.TakeDamage(dmg);
@@ -91,13 +106,13 @@ public class FieldCardAttack : MonoBehaviour
             else
             {
                 enemyHpManager.TakeDamage(dmg);
-                Debug.Log($"[플레이어 턴] {pGO.name} 가 적 플레이어에게 {dmg} 데미지");
+                Debug.Log($"[플레이어 턴] {pGO.name} → 적 플레이어에 {dmg} 데미지");
             }
 
             yield return new WaitForSeconds(delayBetweenAttacks);
         }
 
-        // ─── 아군 턴 끝, 잠시 대기 ────────────────────────────────
+        // ─── 아군 턴 종료 후 대기 ──────────────────────────────────
         yield return new WaitForSeconds(delayAfterPlayerTurn);
 
         // ─── 2) 적 공격 턴 ───────────────────────────────────────
@@ -109,19 +124,32 @@ public class FieldCardAttack : MonoBehaviour
 
             var eGO = eSlot.GetChild(0).gameObject;
             var eFC = eGO.GetComponent<FieldCard>();
-            if (eFC == null) continue;
+            if (eFC == null)
+                continue;
 
-            // (D) 적 EnemyAttack 애니메이션
+            // (H) 적 공격 애니메이션
             var eAnim = eGO.GetComponent<Animator>();
             if (eAnim != null)
             {
                 eAnim.ResetTrigger("EnemyAttack");
                 eAnim.SetTrigger("EnemyAttack");
             }
-
             yield return new WaitForSeconds(attackAnimDuration);
 
-            // (E) 타격 대상 찾기
+            // (I) 공격력 읽기
+            int edmg = eFC.GetAttackPower();
+
+            // (J) Flyer 능력: 아군 카드 검사 없이 플레이어 관통 피해
+            if (eFC.AbilityType == CardData.CardAbilityType.Flyer)
+            {
+                CardEventBus.Attack(eFC, null);
+                playerHpManager.TakeDamage(edmg);
+                Debug.Log($"[적 플라이어 관통] {eGO.name} → 플레이어에 {edmg} 데미지");
+                yield return new WaitForSeconds(delayBetweenAttacks);
+                continue;
+            }
+
+            // (K) 일반 타겟(슬롯 i)에서 FieldCard 찾기
             FieldCard defendFC = null;
             GameObject defendGO = null;
             if (i < playerSlots.Count)
@@ -134,14 +162,20 @@ public class FieldCardAttack : MonoBehaviour
                 }
             }
 
-            int edmg = eFC.GetAttackPower();
+            // (L) Diver 능력: 방어자가 Diver면 플레이어 관통 피해
+            if (defendFC != null && defendFC.AbilityType == CardData.CardAbilityType.Diver)
+            {
+                CardEventBus.Attack(eFC, null);
+                playerHpManager.TakeDamage(edmg);
+                Debug.Log($"[적 다이버 관통] {eGO.name} → 플레이어에 {edmg} 데미지");
+                yield return new WaitForSeconds(delayBetweenAttacks);
+                continue;
+            }
 
-            // ────────────────────────────────────────────────────
-            // ▶ OnAttack 이벤트 호출 (공격자, 방어자(null 가능))
+            // (M) OnAttack 이벤트 발행
             CardEventBus.Attack(eFC, defendFC);
-            // ────────────────────────────────────────────────────
 
-            // (F) 실제 데미지 적용
+            // (N) 실제 데미지 적용
             if (defendFC != null)
             {
                 defendFC.TakeDamage(edmg);
@@ -150,7 +184,7 @@ public class FieldCardAttack : MonoBehaviour
             else
             {
                 playerHpManager.TakeDamage(edmg);
-                Debug.Log($"[적 턴] {eGO.name} 가 플레이어에게 {edmg} 데미지");
+                Debug.Log($"[적 턴] {eGO.name} → 플레이어에 {edmg} 데미지");
             }
 
             yield return new WaitForSeconds(delayBetweenAttacks);

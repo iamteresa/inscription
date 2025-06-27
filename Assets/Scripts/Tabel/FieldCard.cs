@@ -21,6 +21,11 @@ public class FieldCard : MonoBehaviour
     // 붙어 있는 IAbility 인스턴스들
     private List<IAbility> _abilities = new List<IAbility>();
 
+    /// <summary>
+    /// 이 카드의 능력 타입(Flyer, Killer, 등)을 외부에서 읽을 수 있도록.
+    /// </summary>
+    public CardData.CardAbilityType AbilityType => _cardData.AbilityType;
+
     void Awake()
     {
         _cardDisplay = GetComponent<CardDisplay>();

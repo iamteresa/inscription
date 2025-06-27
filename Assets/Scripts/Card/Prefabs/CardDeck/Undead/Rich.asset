@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d45ef6656e13e64bbe8562eba264510, type: 3}
-  m_Name: TVHead
+  m_Name: Rich
   m_EditorClassIdentifier: 
-  _cardName: TVHead
-  _species: 2
-  _attack: 1
-  _health: 3
-  _cardImage: {fileID: 21300000, guid: 75dfb8d5fc099c14ba46e8bf40e3839d, type: 3}
-  _cost: 2
-  _cardSkillImage: {fileID: 21300000, guid: eed44235dcbd621438f7c0c4f05e2356, type: 3}
-  _abilityType: 10
+  _cardName: Lich
+  _species: 1
+  _attack: 3
+  _health: 7
+  _cardImage: {fileID: 21300000, guid: bf741377a5dd4db4ea52634bc0a34550, type: 3}
+  _cost: 6
+  _cardSkillImage: {fileID: 21300000, guid: 2a5c892bdd014164da633b8c6fd0f246, type: 3}
+  _abilityType: 8
   _abilityValue: 0
   _abilityDescription: 

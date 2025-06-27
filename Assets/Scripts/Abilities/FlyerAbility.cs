@@ -14,7 +14,7 @@ public class FlyerAbility : IAbility
 
     void OnAttack(FieldCard attacker, FieldCard defender)
     {
-        if (attacker != _owner && _enemyHp != null) return;
+        if (attacker != _owner && _enemyHp == null) return;
         // 무조건 플레이어에게
         _enemyHp.TakeDamage(attacker.GetAttackPower());
     }

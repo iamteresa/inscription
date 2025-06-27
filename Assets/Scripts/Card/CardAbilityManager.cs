@@ -5,32 +5,39 @@ using UnityEngine;
 /// </summary>
 public class CardAbilityManager : MonoBehaviour
 {
+
+
     public static CardAbilityManager Instance { get; private set; }
 
-    void Awake()
+    private void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        if (Instance != null && Instance != this) Destroy(this);
+        else Instance = this;
     }
 
-    /// <summary>FieldCard.Initialize 안에서 반드시 호출</summary>
+    /// <summary>
+    /// 새로 생성된 FieldCard에 능력을 등록할 때 호출됩니다.
+    /// </summary>
     public void RegisterAll(FieldCard card, CardData data)
     {
-        // 1) 종족 능력
-        IAbility speciesAb = CreateSpeciesAbility(data.Species);
+        // 1) 종족(species) 능력
+        var speciesAb = CreateSpeciesAbility(data.Species);
         if (speciesAb != null)
         {
             speciesAb.Initialize(card, data);
             card.RegisterAbility(speciesAb);
-        }
 
-        // 2) 스킬 능력
-        IAbility skillAb = CreateSkillAbility(data.AbilityType);
+        }
+        // 2) 스킬(AbilityType) 능력
+        var skillAb = CreateSkillAbility(data.AbilityType);
         if (skillAb != null)
         {
             skillAb.Initialize(card, data);
             card.RegisterAbility(skillAb);
         }
+
+
+
     }
 
     private IAbility CreateSpeciesAbility(CardData.CardSpecies s)
@@ -52,9 +59,19 @@ public class CardAbilityManager : MonoBehaviour
     {
         switch (t)
         {
-            //case CardData.CardAbilityType.Lifesteal: return new LifestealAbility();
-            //case CardData.CardAbilityType.Deathrattle: return new DeathrattleAbility();
-            //case CardData.CardAbilityType.Revenger: return new RevengerAbility();
+            case CardData.CardAbilityType.Lifesteal: return new LifestealAbility();
+            case CardData.CardAbilityType.Deathrattle: return new DeathrattleAbility();
+            case CardData.CardAbilityType.Revenger: return new RevengerAbility();
+            case CardData.CardAbilityType.Defender: return new DefenderAbility();
+            case CardData.CardAbilityType.Flyer: return new FlyerAbility();
+            case CardData.CardAbilityType.Killer: return new KillerAbility();
+            case CardData.CardAbilityType.Weaker: return new WeakerAbility();
+            case CardData.CardAbilityType.GoblinRoad: return new GoblinRoadAbility();   //_goblinRoadAbility
+            case CardData.CardAbilityType.Poisoner: return new PoisonerAbility();
+            case CardData.CardAbilityType.Mover: return new MoverAbility();
+            case CardData.CardAbilityType.Diver: return new DiverAbility();
+            
+
             // … 추가 스킬 능력 …
             default: return null;
         }

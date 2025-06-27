@@ -329,6 +329,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa6939884e480d48b9194f7a1d87174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _goblinRoadSettings:
+    goblinPrefab: {fileID: 7793903509410112710, guid: 08c1d921d878c9847a3dfcdc27e4661e, type: 3}
+    goblinCardData: {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
 --- !u!1 &106676970
 GameObject:
   m_ObjectHideFlags: 0
@@ -696,7 +699,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCost: 10
-  currentCost: 10
   costText: {fileID: 354817689}
 --- !u!114 &354817689
 MonoBehaviour:
