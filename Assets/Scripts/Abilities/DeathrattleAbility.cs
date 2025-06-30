@@ -4,45 +4,41 @@ using UnityEngine;
 public class DeathrattleAbility : IAbility
 {
     public string Id => "Deathrattle";
-    private FieldCard _owner;
-    private int _damage = 10;
+    FieldCard _owner;
+    BattlefieldManager _bfm;
+    EnemyCardManager _ecm;
+    int _damage = 10;
 
     public void Initialize(FieldCard owner, CardData data)
     {
         _owner = owner;
-        // CardData.AbilityValue 로 대미지를 조정하고 싶으면 여기를 바꾸세요.
+        _bfm = Object.FindObjectOfType<BattlefieldManager>();
+        _ecm = Object.FindObjectOfType<EnemyCardManager>();
         CardEventBus.OnDeath += OnDeath;
     }
 
-    private void OnDeath(FieldCard dead, CardData data)
+    void OnDeath(FieldCard dead, CardData data)
     {
-        if (dead != _owner) return;
-
-        // 1) 매니저 가져오기
-        var bfm = Object.FindObjectOfType<BattlefieldManager>();
-        var ecm = Object.FindObjectOfType<EnemyCardManager>();
-        if (bfm == null || ecm == null) return;
-
-        // 2) 죽은 카드의 슬롯 인덱스 찾기
-        int idx;
+        // 사망 카드가 플레이어 진영이면 상대편(EnemyField) 같은 인덱스 슬롯 공략
         Transform targetSlot = null;
-
-        if (_owner.faction == FieldCard.CardFaction.Player)
+        if (_owner.faction == FieldCard.CardFaction.Player && _ecm != null)
         {
-            idx = bfm.GetSlotIndex(dead.gameObject);
-            // 플레이어가 죽었으면, 적 필드의 같은 인덱스
-            if (idx >= 0 && idx < ecm.EnemySpawnPoints.Count)
-                targetSlot = ecm.EnemySpawnPoints[idx];
+            // dead.gameObject.transform.parent 가 EnemySpawnPoints 리스트의 어떤 원소인지 찾아보자
+            var parent = dead.gameObject.transform.parent;
+            int idx = _ecm.EnemySpawnPoints.IndexOf(parent);
+            if (idx >= 0 && idx < _ecm.EnemySpawnPoints.Count)
+                targetSlot = _ecm.EnemySpawnPoints[idx];
         }
-        else
+        // 반대로 적 진영 카드가 죽었을 때 플레이어 필드 타겟
+        else if (_owner.faction == FieldCard.CardFaction.Enemy && _bfm != null)
         {
-            idx = ecm.GetSlotIndex(dead.gameObject);
-            // 적이 죽었으면, 플레이어 필드의 같은 인덱스
-            if (idx >= 0 && idx < bfm.SpawnPoints.Count)
-                targetSlot = bfm.SpawnPoints[idx];
+            var parent = dead.gameObject.transform.parent;
+            int idx = _bfm.SpawnPoints.IndexOf(parent);
+            if (idx >= 0 && idx < _bfm.SpawnPoints.Count)
+                targetSlot = _bfm.SpawnPoints[idx];
         }
 
-        // 3) 그 슬롯에 카드가 있으면 한 장만 때리기
+        // 그 슬롯에 카드가 있으면 한 장만 타격
         if (targetSlot != null && targetSlot.childCount > 0)
         {
             var go = targetSlot.GetChild(0).gameObject;
@@ -50,7 +46,7 @@ public class DeathrattleAbility : IAbility
             if (fc != null)
             {
                 fc.TakeDamage(_damage);
-                Debug.Log($"[Deathrattle] {_owner.name} 사망 → {fc.name} 에게 {_damage} 대미지!");
+                Debug.Log($"[Deathrattle] {_owner.name} 사망 → {fc.name} 에게 {_damage} 데미지!");
             }
         }
     }

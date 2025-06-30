@@ -2,13 +2,20 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+/// <summary>
+/// A 키를 누르면
+/// 1) 아군 카드가 순차적으로 앞→뒤 공격 애니메이션(Attack)을 재생하고 데미지를 주고,
+/// 2) 잠시 대기 후
+/// 3) 적 카드가 순차적으로 앞→뒤 공격 애니메이션(EnemyAttack)을 재생하고 대응 아군 카드 또는 플레이어에게 데미지를 주는
+/// 턴 단위 시퀀스를 처리합니다.
+/// </summary>
 public class FieldCardAttack : MonoBehaviour
 {
     [Header("매니저 참조")]
     [SerializeField] private BattlefieldManager battlefieldManager;
     [SerializeField] private EnemyCardManager enemyCardManager;
     [SerializeField] private PlayerHpManger playerHpManager;
-    [SerializeField] private PlayerHpManger enemyHpManager;
+    [SerializeField] private PlayerHpManger enemyHpManager;    // 적 플레이어 HP 매니저
 
     [Header("공격 애니메이션 및 딜레이 설정")]
     [Tooltip("애니메이션 재생 후 데미지 적용 전 대기 시간")]
@@ -32,7 +39,7 @@ public class FieldCardAttack : MonoBehaviour
             StartCoroutine(AttackSequence());
     }
 
-    private IEnumerator AttackSequence()
+    public IEnumerator AttackSequence()
     {
         var playerSlots = battlefieldManager.SpawnPoints;
         var enemySlots = enemyCardManager.EnemySpawnPoints;
@@ -139,7 +146,7 @@ public class FieldCardAttack : MonoBehaviour
             // (I) 공격력 읽기
             int edmg = eFC.GetAttackPower();
 
-            // (J) Flyer 능력: 아군 카드 검사 없이 플레이어 관통 피해
+            // (J) Flyer 능력: 아군 슬롯 검사 없이 플레이어만 관통 피해
             if (eFC.AbilityType == CardData.CardAbilityType.Flyer)
             {
                 CardEventBus.Attack(eFC, null);

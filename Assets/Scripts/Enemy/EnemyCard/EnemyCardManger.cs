@@ -1,159 +1,112 @@
+// Assets/Scripts/Enemy/EnemyCardManager.cs
 using UnityEngine;
-using UnityEngine.UI;               // RectTransform 사용을 위해
-using System.Collections;
 using System.Collections.Generic;
 
-/// <summary>
-/// 적 전용 필드 카드 관리 매니저
-/// 4개의 슬롯에 적 카드를 소환·제거하며, 슬롯에 맞춰 위치·크기까지 자동 조절합니다.
-/// </summary>
 public class EnemyCardManager : MonoBehaviour
 {
-    [Header("----- 적 카드 배치 슬롯(4개) -----")]
-    [SerializeField] private List<Transform> enemySpawnPoints = new List<Transform>();
-     public List<Transform> EnemySpawnPoints => enemySpawnPoints;
+    [Header("----- 덱(Inspector에서 관리) -----")]
+    [Tooltip("적이 사용할 카드 데이터 리스트")]
+    public List<CardData> enemyDeck = new List<CardData>();
 
+    [Header("----- 배치 슬롯(Inspector에서 연결) -----")]
+    [Tooltip("적 필드 슬롯 Transform 리스트")]
+    public List<Transform> EnemySpawnPoints = new List<Transform>();
 
-    [Header("----- 필드 카드 프리팹 -----")]
-    [SerializeField] private GameObject fieldCardPrefab;
+    [Header("----- 필드 카드 Prefab -----")]
+    [Tooltip("FieldCard가 붙은 카드 프리팹")]
+    public GameObject fieldCardPrefab;
 
-    [Header("----- 적 덱 (CardData 리스트) -----")]
-    [SerializeField] private List<CardData> enemyDeck = new List<CardData>();
+    private GameObject[] _occupiedSlots;
 
-    [Header("=== 카드 위치 & 크기 설정 ===")]
-    [Tooltip("소환 시 슬롯 위치에 더해질 오프셋")]
-    [SerializeField] private Vector3 cardPositionOffset = Vector3.zero;
-    [Tooltip("카드의 최종 localScale")]
-    [SerializeField] private Vector3 cardScale = Vector3.one;
-
-    // 슬롯 점유 상태 추적용
-    private GameObject[] occupiedEnemySlots;
-    // (필요하다면 슬롯 점유 상태를 추적하는 배열을 만들어 쓰셔도 좋습니다.)
-    // private GameObject[] _occupiedSlots;
-
-    // 생략된 Awake() 등 초기화 로직이 있다면 그대로 두세요.
-
-    /// <summary>
-    /// 이 GameObject가 어느 슬롯(인덱스)에 배치되어 있는지 반환합니다.
-    /// 없으면 -1 반환.
-    /// </summary>
-    public int GetSlotIndex(GameObject cardGO)
-    {
-        for (int i = 0; i < EnemySpawnPoints.Count; i++)
-        {
-            var slot = EnemySpawnPoints[i];
-            if (slot == null) continue;
-
-            // 자식으로 카드가 붙어있고, 그 카드가 찾고자 하는 cardGO 일 때
-            if (slot.childCount > 0 && slot.GetChild(0).gameObject == cardGO)
-                return i;
-        }
-        return -1;
-    }
     void Awake()
     {
-        if (enemySpawnPoints == null || enemySpawnPoints.Count == 0)
-        {
-            Debug.LogError("EnemyCardManager: 슬롯이 설정되지 않았습니다!", this);
-            enabled = false;
-            return;
-        }
-        occupiedEnemySlots = new GameObject[enemySpawnPoints.Count];
+        _occupiedSlots = new GameObject[EnemySpawnPoints.Count];
+    }
+
+    void OnEnable()
+    {
+        CardEventBus.OnDeath += HandleCardDeath;
+    }
+
+    void OnDisable()
+    {
+        CardEventBus.OnDeath -= HandleCardDeath;
     }
 
     /// <summary>
-    /// 덱에서 랜덤으로 한 장을 뽑아 빈 슬롯에 소환합니다.
-    /// 슬롯이 없거나 덱이 비어 있으면 false를 반환합니다.
+    /// 덱에서 랜덤으로 한 장을 뽑아,
+    /// 빈 슬롯(중복 없는) 중 랜덤한 위치에 소환 후 덱에서 제거합니다.
+    /// 없으면 false, 성공하면 true 반환.
     /// </summary>
     public bool DrawAndSpawnEnemyCard()
     {
+        // 0) 덱이 비었으면 실패
         if (enemyDeck == null || enemyDeck.Count == 0)
         {
             Debug.LogWarning("EnemyCardManager: 덱에 카드가 없습니다.");
             return false;
         }
 
-        // 1) 빈 슬롯 찾기
-        int freeIndex = -1;
-        for (int i = 0; i < occupiedEnemySlots.Length; i++)
+        // 1) 빈 슬롯 인덱스 모두 수집
+        var freeIndices = new List<int>();
+        for (int i = 0; i < _occupiedSlots.Length; i++)
         {
-            if (occupiedEnemySlots[i] == null)
-            {
-                freeIndex = i;
-                break;
-            }
+            if (_occupiedSlots[i] == null)
+                freeIndices.Add(i);
         }
-        if (freeIndex < 0)
+
+        if (freeIndices.Count == 0)
         {
             Debug.Log("EnemyCardManager: 빈 슬롯이 없습니다.");
             return false;
         }
 
         // 2) 덱에서 랜덤 카드 선택 및 덱에서 제거
-        int idx = Random.Range(0, enemyDeck.Count);
-        CardData data = enemyDeck[idx];
-        enemyDeck.RemoveAt(idx);
+        int deckIdx = Random.Range(0, enemyDeck.Count);
+        CardData data = enemyDeck[deckIdx];
+        enemyDeck.RemoveAt(deckIdx);
 
-        // 3) 프리팹 인스턴스화 (부모는 슬롯 Transform)
-        GameObject go = Instantiate(fieldCardPrefab, enemySpawnPoints[freeIndex], false);
+        // 3) 빈 슬롯 중 랜덤 선택
+        int slotIndex = freeIndices[Random.Range(0, freeIndices.Count)];
 
-        // 4) 슬롯용 BattlefieldSlot 컴포넌트를 사용해 위치·크기 적용
-        var slotComp = enemySpawnPoints[freeIndex].GetComponent<BattlefieldSlot>();
+        // 4) 카드 프리팹 인스턴스화 (부모는 선택된 슬롯)
+        Transform parent = EnemySpawnPoints[slotIndex];
+        GameObject go = Instantiate(fieldCardPrefab, parent, false);
+
+        // 5) 슬롯 컴포넌트 있으면 위치·크기 조정
+        var slotComp = parent.GetComponent<BattlefieldSlot>();
         var rect = go.GetComponent<RectTransform>();
         if (slotComp != null && rect != null)
-        {
             slotComp.ApplyPlacementTransform(rect);
-        }
-        else
-        {
-            // 슬롯 컴포넌트나 RectTransform이 없으면 기본 오프셋/스케일만 적용
-            go.transform.localPosition += cardPositionOffset;
-            go.transform.localScale = cardScale;
-        }
 
-        // 5) FieldCard 초기화
-        FieldCard fc = go.GetComponent<FieldCard>();
+        // 6) FieldCard 초기화
+        var fc = go.GetComponent<FieldCard>();
         if (fc == null)
         {
-            Debug.LogError("EnemyCardManager: FieldCard 컴포넌트가 없습니다!", go);
+            Debug.LogError("EnemyCardManager: fieldCardPrefab에 FieldCard 컴포넌트가 없습니다!", go);
             Destroy(go);
             return false;
         }
         fc.Initialize(data, FieldCard.CardFaction.Enemy);
 
-        // 6) 슬롯 점유 상태 등록
-        occupiedEnemySlots[freeIndex] = go;
-        Debug.Log($"EnemyCardManager: 슬롯 {freeIndex}에 '{data.CardName}' 소환 (offset:{cardPositionOffset}, scale:{cardScale})");
+        // 7) 내부 점유 배열에 등록
+        _occupiedSlots[slotIndex] = go;
 
+        Debug.Log($"EnemyCardManager: 슬롯 {slotIndex}에 '{data.CardName}' 랜덤 소환");
         return true;
     }
 
-    /// <summary>
-    /// 특정 적 카드를 슬롯에서 제거하고 오브젝트도 파괴합니다.
-    /// </summary>
-    public void RemoveEnemyCard(GameObject cardGO)
+    private void HandleCardDeath(FieldCard deadCard, CardData cardData)
     {
-        for (int i = 0; i < occupiedEnemySlots.Length; i++)
+        for (int i = 0; i < _occupiedSlots.Length; i++)
         {
-            if (occupiedEnemySlots[i] == cardGO)
+            if (_occupiedSlots[i] != null &&
+                _occupiedSlots[i].GetComponent<FieldCard>() == deadCard)
             {
-                occupiedEnemySlots[i] = null;
-                if (Application.isPlaying)
-                    Destroy(cardGO);
-                Debug.Log($"EnemyCardManager: 슬롯 {i}의 카드를 제거했습니다.");
-                return;
+                _occupiedSlots[i] = null;
+                Debug.Log($"EnemyCardManager: 슬롯 {i} 해제 (카드 사망)");
+                break;
             }
         }
-        Debug.LogWarning("EnemyCardManager: 슬롯에서 해당 카드를 찾을 수 없습니다.", cardGO);
-    }
-
-    /// <summary>
-    /// 현재 소환된 모든 적 카드 GameObject를 반환합니다.
-    /// </summary>
-    public IEnumerable<GameObject> GetAllEnemyCards()
-    {
-        foreach (var go in occupiedEnemySlots)
-            if (go != null)
-                yield return go;
     }
 }

@@ -76,6 +76,7 @@ public class BattlefieldManager : MonoBehaviour
     }
 
 
+
     // 'spawnPoints' 리스트의 각 인덱스에 해당하는 슬롯에 어떤 카드 GameObject가 현재 배치되어 있는지
     // (점유하고 있는지) 추적하는 배열입니다.
     private GameObject[] occupiedSpawnPoints;

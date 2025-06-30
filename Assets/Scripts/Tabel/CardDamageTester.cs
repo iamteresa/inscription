@@ -10,7 +10,7 @@ public class FieldCardDamageTester : MonoBehaviour
     [Header("------------테스트 설정--------------")]
     [Tooltip("스페이스바를 눌렀을 때 적용할 데미지 양")]
     [SerializeField] private int testDamageAmount = 1;
-    [SerializeField] EnemyCardManager _enemyCardManger;
+    [SerializeField] private EnemyCardManager _enemyCardManager;
 
     void Update()
     {
@@ -20,7 +20,7 @@ public class FieldCardDamageTester : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.T))
         {
-            _enemyCardManger.DrawAndSpawnEnemyCard();
+           _enemyCardManager.DrawAndSpawnEnemyCard();   
         }
     }
 
