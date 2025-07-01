@@ -18,8 +18,8 @@ public class RevengerAbility : IAbility
         // 만약 공격받은 대상이 내 주인(_owner)이면, 공격자에게 1 피해를 준다
         if (defender == _owner && attacker != null)
         {
-            attacker.TakeDamage(1);
             Debug.Log($"[RevengerAbility] {_owner.name} 이/가 공격당해서 {attacker.name} 에게 1 데미지 반격!");
+            attacker.TakeDamage(1);
         }
     }
 

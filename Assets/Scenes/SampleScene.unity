@@ -228,6 +228,7 @@ GameObject:
   - component: {fileID: 53242554}
   - component: {fileID: 53242555}
   - component: {fileID: 53242556}
+  - component: {fileID: 53242557}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -313,7 +314,7 @@ MonoBehaviour:
   battlefieldManager: {fileID: 207031366}
   enemyCardManager: {fileID: 207031369}
   playerHpManager: {fileID: 1979700070}
-  enemyHpManager: {fileID: 762615569}
+  enemyHpManager: {fileID: 0}
   attackAnimDuration: 0.1
   delayBetweenAttacks: 0.2
   delayAfterPlayerTurn: 0.5
@@ -329,6 +330,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa6939884e480d48b9194f7a1d87174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &53242557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53242550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7ce95910ef812d418444d9d779deeb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  handManager: {fileID: 488768587}
+  initialRandomDrawCount: 3
+  drawInterval: 0.37
+  squirrelCardData: {fileID: 11400000, guid: 0ab771ff78a957b459e1186aaa0b2278, type: 2}
 --- !u!1 &106676970
 GameObject:
   m_ObjectHideFlags: 0
@@ -1501,6 +1518,7 @@ MonoBehaviour:
   maxHealth: 10
   _hpFillImage: {fileID: 848133253}
   _hpText: {fileID: 1133138323}
+  owner: 1
   sceneToLoadOnDeath: ClearScene
 --- !u!1 &846562260
 GameObject:
@@ -2171,8 +2189,8 @@ MonoBehaviour:
   spawnPerTurn: 1
   spawnDelay: 0.3
   enemyCardManager: {fileID: 207031369}
-  cardAttack: {fileID: 0}
-  handManager: {fileID: 0}
+  cardAttack: {fileID: 53242555}
+  handManager: {fileID: 488768587}
 --- !u!4 &1173997957
 Transform:
   m_ObjectHideFlags: 0
@@ -3281,6 +3299,7 @@ MonoBehaviour:
   maxHealth: 10
   _hpFillImage: {fileID: 435901950}
   _hpText: {fileID: 1264016309}
+  owner: 0
   sceneToLoadOnDeath: GameOver
 --- !u!1 &1998434561
 GameObject:

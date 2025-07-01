@@ -652,7 +652,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCost: 10
-  currentCost: 0
   costText: {fileID: 0}
 --- !u!1 &8257328336341322850
 GameObject:

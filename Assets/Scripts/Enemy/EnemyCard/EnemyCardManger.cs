@@ -4,39 +4,58 @@ using System.Collections.Generic;
 
 public class EnemyCardManager : MonoBehaviour
 {
-    [Header("----- 덱(Inspector에서 관리) -----")]
-    [Tooltip("적이 사용할 카드 데이터 리스트")]
-    public List<CardData> enemyDeck = new List<CardData>();
+    public enum Difficulty { Easy, Normal, Hard, Nightmare }
+
+    [Header("=== 난이도별 덱 설정 (Inspector) ===")]
+    [Tooltip("Easy 모드에서 사용할 카드들")]
+    [SerializeField] private List<CardData> easyDeck = new List<CardData>();
+    [Tooltip("Normal 모드에서 사용할 카드들")]
+    [SerializeField] private List<CardData> normalDeck = new List<CardData>();
+    [Tooltip("Hard 모드에서 사용할 카드들")]
+    [SerializeField] private List<CardData> hardDeck = new List<CardData>();
+    [Tooltip("Nightmare 모드에서 사용할 카드들")]
+    [SerializeField] private List<CardData> nightmareDeck = new List<CardData>();
+
+    [Header("----- 실제 소환에 사용하는 덱 -----")]
+    private List<CardData> enemyDeck = new List<CardData>();
 
     [Header("----- 배치 슬롯(Inspector에서 연결) -----")]
     [Tooltip("적 필드 슬롯 Transform 리스트")]
-    public List<Transform> EnemySpawnPoints = new List<Transform>();
+    [SerializeField] private List<Transform> _enemySpawnPoints = new List<Transform>();
+
+    /// <summary>외부에서 읽기 전용으로 접근할 수 있도록 공개 프로퍼티</summary>
+    public IReadOnlyList<Transform> EnemySpawnPoints => _enemySpawnPoints;
 
     [Header("----- 필드 카드 Prefab -----")]
     [Tooltip("FieldCard가 붙은 카드 프리팹")]
-    public GameObject fieldCardPrefab;
-
-    private GameObject[] _occupiedSlots;
+    [SerializeField] private GameObject fieldCardPrefab;
 
     void Awake()
     {
-        _occupiedSlots = new GameObject[EnemySpawnPoints.Count];
-    }
+        // 1) 전역 설정에서 난이도 가져오기
+        Difficulty diff = (Difficulty)GameSettings.CurrentDifficulty;
 
-    void OnEnable()
-    {
-        CardEventBus.OnDeath += HandleCardDeath;
-    }
-
-    void OnDisable()
-    {
-        CardEventBus.OnDeath -= HandleCardDeath;
+        // 2) 알맞은 덱을 enemyDeck에 복사
+        enemyDeck.Clear();
+        switch (diff)
+        {
+            case Difficulty.Easy:
+                enemyDeck.AddRange(easyDeck);
+                break;
+            case Difficulty.Normal:
+                enemyDeck.AddRange(normalDeck);
+                break;
+            case Difficulty.Hard:
+                enemyDeck.AddRange(hardDeck);
+                break;
+            case Difficulty.Nightmare:
+                enemyDeck.AddRange(nightmareDeck);
+                break;
+        }
     }
 
     /// <summary>
-    /// 덱에서 랜덤으로 한 장을 뽑아,
-    /// 빈 슬롯(중복 없는) 중 랜덤한 위치에 소환 후 덱에서 제거합니다.
-    /// 없으면 false, 성공하면 true 반환.
+    /// 덱에서 랜덤으로 한 장을 뽑아 빈 슬롯에 소환하고 덱에서 제거합니다.
     /// </summary>
     public bool DrawAndSpawnEnemyCard()
     {
@@ -47,15 +66,17 @@ public class EnemyCardManager : MonoBehaviour
             return false;
         }
 
-        // 1) 빈 슬롯 인덱스 모두 수집
-        var freeIndices = new List<int>();
-        for (int i = 0; i < _occupiedSlots.Length; i++)
+        // 1) 빈 슬롯 찾기
+        int freeIndex = -1;
+        for (int i = 0; i < EnemySpawnPoints.Count; i++)
         {
-            if (_occupiedSlots[i] == null)
-                freeIndices.Add(i);
+            if (EnemySpawnPoints[i].childCount == 0)
+            {
+                freeIndex = i;
+                break;
+            }
         }
-
-        if (freeIndices.Count == 0)
+        if (freeIndex < 0)
         {
             Debug.Log("EnemyCardManager: 빈 슬롯이 없습니다.");
             return false;
@@ -66,47 +87,18 @@ public class EnemyCardManager : MonoBehaviour
         CardData data = enemyDeck[deckIdx];
         enemyDeck.RemoveAt(deckIdx);
 
-        // 3) 빈 슬롯 중 랜덤 선택
-        int slotIndex = freeIndices[Random.Range(0, freeIndices.Count)];
-
-        // 4) 카드 프리팹 인스턴스화 (부모는 선택된 슬롯)
-        Transform parent = EnemySpawnPoints[slotIndex];
+        // 3) 프리팹 인스턴스화
+        Transform parent = EnemySpawnPoints[freeIndex];
         GameObject go = Instantiate(fieldCardPrefab, parent, false);
 
-        // 5) 슬롯 컴포넌트 있으면 위치·크기 조정
-        var slotComp = parent.GetComponent<BattlefieldSlot>();
-        var rect = go.GetComponent<RectTransform>();
-        if (slotComp != null && rect != null)
-            slotComp.ApplyPlacementTransform(rect);
-
-        // 6) FieldCard 초기화
+        // 4) FieldCard 초기화
         var fc = go.GetComponent<FieldCard>();
-        if (fc == null)
-        {
-            Debug.LogError("EnemyCardManager: fieldCardPrefab에 FieldCard 컴포넌트가 없습니다!", go);
-            Destroy(go);
-            return false;
-        }
-        fc.Initialize(data, FieldCard.CardFaction.Enemy);
+        if (fc != null)
+            fc.Initialize(data, FieldCard.CardFaction.Enemy);
+        else
+            Debug.LogError("EnemyCardManager: fieldCardPrefab에 FieldCard가 없습니다.", go);
 
-        // 7) 내부 점유 배열에 등록
-        _occupiedSlots[slotIndex] = go;
-
-        Debug.Log($"EnemyCardManager: 슬롯 {slotIndex}에 '{data.CardName}' 랜덤 소환");
+        Debug.Log($"EnemyCardManager: [{GameSettings.CurrentDifficulty}] 슬롯 {freeIndex}에 '{data.CardName}' 소환");
         return true;
-    }
-
-    private void HandleCardDeath(FieldCard deadCard, CardData cardData)
-    {
-        for (int i = 0; i < _occupiedSlots.Length; i++)
-        {
-            if (_occupiedSlots[i] != null &&
-                _occupiedSlots[i].GetComponent<FieldCard>() == deadCard)
-            {
-                _occupiedSlots[i] = null;
-                Debug.Log($"EnemyCardManager: 슬롯 {i} 해제 (카드 사망)");
-                break;
-            }
-        }
     }
 }

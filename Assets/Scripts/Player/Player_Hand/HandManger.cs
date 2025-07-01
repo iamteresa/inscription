@@ -21,7 +21,7 @@ public class HandManager : MonoBehaviour
     // --- 참조 매니저들 (인스펙터에서 직접 연결하는 것이 좋습니다.) ---
     [Header("---------- 다른 매니저 참조 ---------")]
     [SerializeField] private BattlefieldManager battlefieldManager;
-    [SerializeField] private PlayerCostManager playerCostManager; 
+    [SerializeField] private PlayerCostManager playerCostManager;
 
     // HandManager가 관리할 전역 UI 텍스트 (CardSelector에 주입)
     [Header("-------- UI 연동 -------------")]
@@ -38,28 +38,23 @@ public class HandManager : MonoBehaviour
         {
             battlefieldManager = FindObjectOfType<BattlefieldManager>();
             if (battlefieldManager == null)
-            {
                 Debug.LogError("HandManager: BattlefieldManager가 연결되지 않았거나 씬에서 찾을 수 없습니다.", this);
-            }
         }
-        if (playerCostManager == null) 
+        if (playerCostManager == null)
         {
             playerCostManager = FindObjectOfType<PlayerCostManager>();
             if (playerCostManager == null)
-            {
-                Debug.LogWarning("HandManager: PlayerCostManager가 연결되지 않았거나 씬에서 찾을 수 없습니다. (필요 시 연결)", this);
-            }
+                Debug.LogWarning("HandManager: PlayerCostManager가 연결되지 않았거나 씬에서 찾을 수 없습니다.", this);
         }
 
         if (_globalSelectionInfoText == null)
-        {
-            Debug.LogError("HandManager: Global Selection Info Text가 연결되지 않았습니다. 인스펙터에서 TextMeshProUGUI 컴포넌트를 연결해주세요.", this);
-        }
+            Debug.LogError("HandManager: Global Selection Info Text가 연결되지 않았습니다.", this);
+
         HideGlobalSelectionInfo();
     }
 
     /// <summary>
-    /// 덱에서 카드를 한 장 뽑아 손패에 추가합니다.
+    /// 덱에서 랜덤으로 한 장 뽑아 손패에 추가합니다.
     /// </summary>
     public void DrawCard()
     {
@@ -77,9 +72,10 @@ public class HandManager : MonoBehaviour
 
         int index = Random.Range(0, drawPile.Count);
         CardData cardData = drawPile[index];
+        drawPile.RemoveAt(index);
 
+        // Instantiate & 세팅
         GameObject cardGO = Instantiate(cardPrefab, handArea);
-
         CardDisplay display = cardGO.GetComponent<CardDisplay>();
         if (display != null)
         {
@@ -89,14 +85,57 @@ public class HandManager : MonoBehaviour
 
         CardSelector selector = cardGO.GetComponent<CardSelector>();
         if (selector != null)
-        {
-            // CardSelector에 HandManager의 전역 UI 텍스트를 할당
             selector.SelectionInfoText = _globalSelectionInfoText;
-        }
 
         handCards.Add(cardGO);
-        drawPile.RemoveAt(index);
+        ArrangeHandCards();
+    }
 
+    /// <summary>
+    /// 덱이 아닌, 지정한 CardData만 손패에 추가합니다.
+    /// (게임 시작 시 특정 카드를 주거나, 퀘스트 보상 등으로 사용)
+    /// </summary>
+    public void DrawSpecificCard(CardData data)
+    {
+        if (data == null)
+        {
+            Debug.LogError("HandManager.DrawSpecificCard: data가 null입니다.");
+            return;
+        }
+        if (handCards.Count >= maxHandSize)
+        {
+            Debug.Log("손패가 가득 찼습니다! 특정 카드를 추가할 수 없습니다.");
+            return;
+        }
+        if (cardPrefab == null || handArea == null)
+        {
+            Debug.LogError("HandManager: cardPrefab 또는 handArea가 할당되지 않았습니다.");
+            return;
+        }
+
+        // 1) Instantiate
+        GameObject cardGO = Instantiate(cardPrefab, handArea);
+
+        // 2) CardDisplay 세팅
+        CardDisplay display = cardGO.GetComponent<CardDisplay>();
+        if (display != null)
+        {
+            display.cardData = data;
+            display.UpdateDisplay();
+        }
+        else
+        {
+            Debug.LogError("HandManager.DrawSpecificCard: CardDisplay 컴포넌트가 없습니다.", cardGO);
+        }
+        
+
+        // 3) CardSelector 세팅
+        CardSelector selector = cardGO.GetComponent<CardSelector>();
+        if (selector != null)
+            selector.SelectionInfoText = _globalSelectionInfoText;
+
+        // 4) 내부 리스트에 추가 & 재정렬
+        handCards.Add(cardGO);
         ArrangeHandCards();
     }
 
@@ -114,14 +153,11 @@ public class HandManager : MonoBehaviour
         {
             GameObject card = handCards[i];
             Vector3 targetPos = new Vector3(startX + cardSpacing * i, 0, 0);
-
             card.transform.localPosition = targetPos;
 
             CardHover hover = card.GetComponent<CardHover>();
             if (hover != null)
-            {
                 hover.SetOriginalPosition(targetPos);
-            }
         }
     }
 

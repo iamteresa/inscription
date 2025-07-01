@@ -2,56 +2,57 @@ using UnityEngine;
 using UnityEngine.UI; // UI Image 컴포넌트를 사용하기 위해 필요
 using UnityEngine.SceneManagement;
 using TMPro; // 씬 관리를 위해 추가
-public enum Owner { Player, Enemy }
-public class PlayerHpManger : MonoBehaviour
+
+public class EnemyHpManger : MonoBehaviour
 {
     [Header("----------------HP 설정-------------")]
-    [SerializeField] private int maxHealth = 10; // 플레이어의 최대 체력
-    private int _currentHealth; // 플레이어의 현재 체력
+    [SerializeField] private int maxHealth = 10; // 적의 최대 체력
+    private int _currentHealth; // 적의 현재 체력
     public int CurrentHp => _currentHealth;
 
     [Header("--------------UI 연동---------------")]
     [SerializeField] private Image _hpFillImage; // HP 바의 fill Image 컴포넌트
     [SerializeField] private TextMeshProUGUI _hpText;
 
-    [Header("---------- 적, 플레이어 체력 구분 -----------")]
-    [SerializeField] private Owner owner;                // 이 컴포넌트가 '플레이어' 용인지 '적' 용인지
-
+    // 플레이어가 데미지를 받을 때 호출할 이벤트 (선택 사항: 나중에 이벤트 시스템 구현 시 유용)
+    // public event System.Action<int> OnHealthChanged;
 
     [Header("--------------사망 시 씬 전환---------------")]
     [SerializeField] private string sceneToLoadOnDeath; // 사망 시 로드할 씬의 이름
 
     void Awake()
     {
-        // 1) 난이도별로 적 체력만 올려주기
-        if (owner == Owner.Enemy)
-        {
+       
+            // GameSettings.CurrentDifficulty 에 따라 최대 HP 세팅
             switch (GameSettings.CurrentDifficulty)
             {
                 case GameSettings.Difficulty.Easy:
-                    maxHealth += 0;   // 이지 모드에서는 보정 없음
+                    maxHealth = 10;
                     break;
                 case GameSettings.Difficulty.Normal:
-                    maxHealth += 7;
+                    maxHealth = 17;
                     break;
                 case GameSettings.Difficulty.Hard:
-                    maxHealth += 15;
+                    maxHealth = 25;
                     break;
                 case GameSettings.Difficulty.Nightmare:
-                    maxHealth += 40;
+                    maxHealth = 50;
                     break;
             }
-        }
-        // 2) 게임 시작 시 현재 체력을 최대 체력으로 설정
-        _currentHealth = maxHealth;
 
-        // 3) HP 바 UI가 연결되었는지 확인
+            // 초기 HP 설정
+            _currentHealth = maxHealth;
+
+        
+
+
+        // HP 바 UI가 연결되었는지 확인
         if (_hpFillImage == null)
         {
-            Debug.LogError("PlayerHealth: HP Fill Image가 연결되지 않았습니다. 인스펙터에서 할당해주세요.", this);
+            Debug.LogError("적 hp 메니져 : PlayerHealth: HP Fill Image가 연결되지 않았습니다. 인스펙터에서 할당해주세요.", this);
         }
 
-        // 4) 초기 HP UI 업데이트
+        // 초기 HP UI 업데이트
         UpdateHealthUI();
     }
 
@@ -63,14 +64,14 @@ public class PlayerHpManger : MonoBehaviour
     {
         if (damageAmount < 0)
         {
-            Debug.LogWarning("데미지 양은 음수가 될 수 없습니다. TakeDamage 대신 Heal을 사용하세요.");
+            Debug.LogWarning("적 hp 메니져 : 데미지 양은 음수가 될 수 없습니다. TakeDamage 대신 Heal을 사용하세요.");
             return;
         }
 
         _currentHealth -= damageAmount; // 현재 체력에서 데미지 감소
         _currentHealth = Mathf.Max(_currentHealth, 0); // 체력이 0 미만으로 내려가지 않도록 보정
 
-        Debug.Log($"플레이어가 {damageAmount} 데미지를 받았습니다. 현재 체력: {_currentHealth}");
+        Debug.Log($"적 hp 메니져 : 플레이어가 {damageAmount} 데미지를 받았습니다. 현재 체력: {_currentHealth}");
 
         UpdateHealthUI(); // UI 업데이트
 
@@ -88,14 +89,14 @@ public class PlayerHpManger : MonoBehaviour
     {
         if (healAmount < 0)
         {
-            Debug.LogWarning("회복 양은 음수가 될 수 없습니다. Heal 대신 TakeDamage를 사용하세요.");
+            Debug.LogWarning("적 hp 메니져 : 회복 양은 음수가 될 수 없습니다. Heal 대신 TakeDamage를 사용하세요.");
             return;
         }
 
         _currentHealth += healAmount; // 현재 체력에 회복량 추가
         _currentHealth = Mathf.Min(_currentHealth, maxHealth); // 체력이 최대 체력을 초과하지 않도록 보정
 
-        Debug.Log($"플레이어가 {healAmount} 체력을 회복했습니다. 현재 체력: {_currentHealth}");
+        Debug.Log($"적 hp 메니져 : 플레이어가 {healAmount} 체력을 회복했습니다. 현재 체력: {_currentHealth}");
 
         UpdateHealthUI(); // UI 업데이트
     }
@@ -120,15 +121,15 @@ public class PlayerHpManger : MonoBehaviour
     /// </summary>
     private void Die()
     {
-        Debug.Log("플레이어가 사망했습니다!");
+        Debug.Log("적 hp 메니져 : 플레이어가 사망했습니다!");
         if (!string.IsNullOrEmpty(sceneToLoadOnDeath)) // 씬 이름이 비어있지 않은지 확인
         {
-            Debug.Log($"플레이어 사망으로 인해 씬 '{sceneToLoadOnDeath}'으로 이동합니다.");
+            Debug.Log($"적 hp 메니져 : 플레이어 사망으로 인해 씬 '{sceneToLoadOnDeath}'으로 이동합니다.");
             SceneManager.LoadScene(sceneToLoadOnDeath); // 지정된 씬 이름으로 씬 로드
         }
         else
         {
-            Debug.LogWarning("사망 시 로드할 씬 이름이 지정되지 않았습니다. " +
+            Debug.LogWarning("적 hp 메니져 : 사망 시 로드할 씬 이름이 지정되지 않았습니다. " +
                 "'Scene To Load On Death' 필드를 확인해주세요.", this);
             gameObject.SetActive(false);
         }
