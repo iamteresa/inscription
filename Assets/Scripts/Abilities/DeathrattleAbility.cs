@@ -1,52 +1,56 @@
 // Assets/Scripts/Abilities/DeathrattleAbility.cs
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DeathrattleAbility : IAbility
 {
     public string Id => "Deathrattle";
-    FieldCard _owner;
-    BattlefieldManager _bfm;
-    EnemyCardManager _ecm;
-    int _damage = 10;
+    private FieldCard _owner;
+    private int _damage = 10; // 고정 10 데미지
 
     public void Initialize(FieldCard owner, CardData data)
     {
         _owner = owner;
-        _bfm = Object.FindObjectOfType<BattlefieldManager>();
-        _ecm = Object.FindObjectOfType<EnemyCardManager>();
+        // 카드가 죽을 때 불러줄 이벤트 (CardEventBus.OnDeath(Card, CardData) 를 사용중이라 가정)
         CardEventBus.OnDeath += OnDeath;
     }
 
-    void OnDeath(FieldCard dead, CardData data)
+    private void OnDeath(FieldCard dead, CardData data)
     {
-        // 사망 카드가 플레이어 진영이면 상대편(EnemyField) 같은 인덱스 슬롯 공략
-        Transform targetSlot = null;
-        if (_owner.faction == FieldCard.CardFaction.Player && _ecm != null)
+        if (dead != _owner) return;  // 자기 자신이 죽었을 때만 발동
+
+        // 내 카드인지 상대 카드인지에 따라 타겟 필드 결정
+        bool imPlayer = _owner.faction == FieldCard.CardFaction.Player;
+        List<Transform> slots;
+
+        if (imPlayer)
         {
-            // dead.gameObject.transform.parent 가 EnemySpawnPoints 리스트의 어떤 원소인지 찾아보자
-            var parent = dead.gameObject.transform.parent;
-            int idx = _ecm.EnemySpawnPoints.IndexOf(parent);
-            if (idx >= 0 && idx < _ecm.EnemySpawnPoints.Count)
-                targetSlot = _ecm.EnemySpawnPoints[idx];
+            // 내가 플레이어일 때는 적 진영을 노린다
+            var ecm = Object.FindObjectOfType<EnemyCardManager>();
+            if (ecm == null) return;
+            slots = (List<Transform>)ecm.EnemySpawnPoints;
         }
-        // 반대로 적 진영 카드가 죽었을 때 플레이어 필드 타겟
-        else if (_owner.faction == FieldCard.CardFaction.Enemy && _bfm != null)
+        else
         {
-            var parent = dead.gameObject.transform.parent;
-            int idx = _bfm.SpawnPoints.IndexOf(parent);
-            if (idx >= 0 && idx < _bfm.SpawnPoints.Count)
-                targetSlot = _bfm.SpawnPoints[idx];
+            // 내가 적일 때는 플레이어 진영을 노린다
+            var bfm = Object.FindObjectOfType<BattlefieldManager>();
+            if (bfm == null) return;
+            slots = bfm.SpawnPoints;
         }
 
-        // 그 슬롯에 카드가 있으면 한 장만 타격
-        if (targetSlot != null && targetSlot.childCount > 0)
+        // “앞에서 첫 번째로 자리 잡고 있는 카드” 한 장을 찾아서 데미지
+        foreach (var slot in slots)
         {
-            var go = targetSlot.GetChild(0).gameObject;
-            var fc = go.GetComponent<FieldCard>();
-            if (fc != null)
+            if (slot.childCount > 0)
             {
-                fc.TakeDamage(_damage);
-                Debug.Log($"[Deathrattle] {_owner.name} 사망 → {fc.name} 에게 {_damage} 데미지!");
+                var targetGO = slot.GetChild(0).gameObject;
+                var fc = targetGO.GetComponent<FieldCard>();
+                if (fc != null)
+                {
+                    fc.TakeDamage(_damage);
+                    Debug.Log($"[Deathrattle] {_owner.name} 사망 → {fc.name}에 {_damage} 데미지!");
+                }
+                break;
             }
         }
     }
