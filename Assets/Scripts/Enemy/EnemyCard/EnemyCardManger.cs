@@ -1,6 +1,7 @@
 // Assets/Scripts/Enemy/EnemyCardManager.cs
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq; // LINQ를 사용하기 위해 추가
 
 public class EnemyCardManager : MonoBehaviour
 {
@@ -52,6 +53,17 @@ public class EnemyCardManager : MonoBehaviour
                 enemyDeck.AddRange(nightmareDeck);
                 break;
         }
+
+        // --- 추가: 덱에 null 카드가 있는지 초기 검사 (기존 오류 방지용) ---
+        for (int i = enemyDeck.Count - 1; i >= 0; i--)
+        {
+            if (enemyDeck[i] == null)
+            {
+                Debug.LogWarning($"EnemyCardManager: Initial enemyDeck contains a null CardData at index {i}. Removing it.", this);
+                enemyDeck.RemoveAt(i);
+            }
+        }
+        // --- End of 추가 ---
     }
 
     /// <summary>
@@ -66,26 +78,39 @@ public class EnemyCardManager : MonoBehaviour
             return false;
         }
 
-        // 1) 빈 슬롯 찾기
-        int freeIndex = -1;
+        // --- 변경된 코드: 빈 슬롯을 랜덤으로 찾기 ---
+        List<int> freeSlotIndices = new List<int>();
         for (int i = 0; i < EnemySpawnPoints.Count; i++)
         {
             if (EnemySpawnPoints[i].childCount == 0)
             {
-                freeIndex = i;
-                break;
+                freeSlotIndices.Add(i);
             }
         }
-        if (freeIndex < 0)
+
+        if (freeSlotIndices.Count == 0)
         {
             Debug.Log("EnemyCardManager: 빈 슬롯이 없습니다.");
             return false;
         }
 
+        // 빈 슬롯들 중에서 랜덤으로 하나 선택
+        int randomIndex = Random.Range(0, freeSlotIndices.Count);
+        int freeIndex = freeSlotIndices[randomIndex];
+        // --- End of 변경된 코드 ---
+
         // 2) 덱에서 랜덤 카드 선택 및 덱에서 제거
         int deckIdx = Random.Range(0, enemyDeck.Count);
         CardData data = enemyDeck[deckIdx];
         enemyDeck.RemoveAt(deckIdx);
+
+        // --- 추가: 뽑은 카드가 null인지 확인 (이전 오류 방지용) ---
+        if (data == null)
+        {
+            Debug.LogError("EnemyCardManager: 덱에서 null CardData가 뽑혔습니다. 덱 구성을 확인하세요.", this);
+            return false;
+        }
+        // --- End of 추가 ---
 
         // 3) 프리팹 인스턴스화
         Transform parent = EnemySpawnPoints[freeIndex];
@@ -97,6 +122,29 @@ public class EnemyCardManager : MonoBehaviour
             fc.Initialize(data, FieldCard.CardFaction.Enemy);
         else
             Debug.LogError("EnemyCardManager: fieldCardPrefab에 FieldCard가 없습니다.", go);
+
+        // --- BattlefieldSlot의 배치 설정 적용 ---
+        RectTransform cardRectTransform = go.GetComponent<RectTransform>();
+        if (cardRectTransform != null)
+        {
+            BattlefieldSlot targetSlot = parent.GetComponent<BattlefieldSlot>();
+            if (targetSlot != null)
+            {
+                targetSlot.ApplyPlacementTransform(cardRectTransform);
+            }
+            else
+            {
+                Debug.LogWarning($"EnemyCardManager: 슬롯 '{parent.name}'에 BattlefieldSlot 컴포넌트가 없습니다. 기본 크기와 위치가 적용됩니다.", parent);
+                // 기본값 적용 (필요하다면)
+                cardRectTransform.anchoredPosition = Vector2.zero;
+                cardRectTransform.localScale = Vector3.one;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("EnemyCardManager: 소환된 카드 프리팹에 RectTransform이 없습니다. UI 요소가 아닐 수 있습니다.", go);
+        }
+        // --- End of BattlefieldSlot의 배치 설정 적용 ---
 
         Debug.Log($"EnemyCardManager: [{GameSettings.CurrentDifficulty}] 슬롯 {freeIndex}에 '{data.CardName}' 소환");
         return true;

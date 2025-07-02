@@ -566,14 +566,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7deb113621fe5940b98051c6edecb6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyDeck:
+  easyDeck:
+  - {fileID: 11400000, guid: 0ab771ff78a957b459e1186aaa0b2278, type: 2}
+  - {fileID: 11400000, guid: 383be888d0ecc70428b5018043b0d596, type: 2}
+  - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
+  - {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
+  - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
+  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
+  - {fileID: 11400000, guid: a84017fa82bd2dc40a831c3cf4c16ab1, type: 2}
+  - {fileID: 11400000, guid: eb0bc49548effa04eb42ee64a4a93358, type: 2}
+  - {fileID: 11400000, guid: 78616c9a9a6bef44dbfb9c839740882e, type: 2}
+  normalDeck:
+  - {fileID: 11400000, guid: 2149d0fa738901a41b4427ac7a086d11, type: 2}
+  - {fileID: 11400000, guid: 0ab771ff78a957b459e1186aaa0b2278, type: 2}
+  - {fileID: 11400000, guid: 383be888d0ecc70428b5018043b0d596, type: 2}
+  - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
+  - {fileID: 11400000, guid: 1f5344c3b9454494886dfd391c321634, type: 2}
   - {fileID: 11400000, guid: 60e5258d53af7f84e913b03f9e0d756d, type: 2}
   - {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
   - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
+  - {fileID: 11400000, guid: a84017fa82bd2dc40a831c3cf4c16ab1, type: 2}
+  - {fileID: 11400000, guid: eb0bc49548effa04eb42ee64a4a93358, type: 2}
+  - {fileID: 11400000, guid: 78616c9a9a6bef44dbfb9c839740882e, type: 2}
+  hardDeck:
+  - {fileID: 11400000, guid: 57f10c753655ed4479917213f9f8d1f3, type: 2}
+  - {fileID: 11400000, guid: eb0bc49548effa04eb42ee64a4a93358, type: 2}
+  - {fileID: 11400000, guid: 719094b38217f1448a47ac34a20ac608, type: 2}
+  - {fileID: 11400000, guid: a84017fa82bd2dc40a831c3cf4c16ab1, type: 2}
+  - {fileID: 11400000, guid: 60e5258d53af7f84e913b03f9e0d756d, type: 2}
+  - {fileID: 11400000, guid: d61812649479047408644df842d8a468, type: 2}
+  - {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
+  - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
   - {fileID: 11400000, guid: 383be888d0ecc70428b5018043b0d596, type: 2}
-  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
   - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
-  EnemySpawnPoints:
+  - {fileID: 11400000, guid: 2149d0fa738901a41b4427ac7a086d11, type: 2}
+  - {fileID: 11400000, guid: 0ab771ff78a957b459e1186aaa0b2278, type: 2}
+  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
+  nightmareDeck:
+  - {fileID: 11400000, guid: 2149d0fa738901a41b4427ac7a086d11, type: 2}
+  - {fileID: 11400000, guid: 383be888d0ecc70428b5018043b0d596, type: 2}
+  - {fileID: 11400000, guid: c1649697380544548b3ebb6aafae2bba, type: 2}
+  - {fileID: 11400000, guid: 1f5344c3b9454494886dfd391c321634, type: 2}
+  - {fileID: 11400000, guid: d61812649479047408644df842d8a468, type: 2}
+  - {fileID: 11400000, guid: 60e5258d53af7f84e913b03f9e0d756d, type: 2}
+  - {fileID: 11400000, guid: 94e9fd9cc9a564b41bf9feebb0f72111, type: 2}
+  - {fileID: 11400000, guid: 1010b5e6b78411b45954a57dcef3e05e, type: 2}
+  - {fileID: 11400000, guid: a84017fa82bd2dc40a831c3cf4c16ab1, type: 2}
+  - {fileID: 11400000, guid: de62d7a5978161a4ab7e1a1b8fa806cc, type: 2}
+  - {fileID: 11400000, guid: 0991c53b230aeff40a2a455bed1fd158, type: 2}
+  - {fileID: 11400000, guid: 719094b38217f1448a47ac34a20ac608, type: 2}
+  - {fileID: 11400000, guid: 78616c9a9a6bef44dbfb9c839740882e, type: 2}
+  - {fileID: 11400000, guid: b05c300165df6944eac7ed1beb27bea0, type: 2}
+  - {fileID: 11400000, guid: 57f10c753655ed4479917213f9f8d1f3, type: 2}
+  - {fileID: 11400000, guid: eb0bc49548effa04eb42ee64a4a93358, type: 2}
+  _enemySpawnPoints:
   - {fileID: 1463773668}
   - {fileID: 846562261}
   - {fileID: 33528889}
@@ -1245,7 +1291,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -1061235666, guid: d71a3dc7aa20fad4f9a99fc76a9254ba, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2717,7 +2763,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: -1061235666, guid: d71a3dc7aa20fad4f9a99fc76a9254ba, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1

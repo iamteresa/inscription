@@ -28,7 +28,10 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // 마우스 클릭 이벤트 처리
+    /// <summary>
+    /// 마우스 클릭 이벤트 처리
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button == PointerEventData.InputButton.Left) // 좌클릭 시
@@ -60,13 +63,19 @@ public class BattlefieldSlot : MonoBehaviour, IPointerClickHandler
     }
 
 
-    // 외부에서 이 슬롯의 인덱스를 설정해야 할 경우를 대비한 Setter (BattlefieldManager에서 사용)
+    /// <summary>
+    /// 외부에서 이 슬롯의 인덱스를 설정해야 할 경우를 대비한 Setter (BattlefieldManager에서 사용)
+    /// </summary>
+    /// <param name="index"></param>
     public void SetSlotIndex(int index)
     {
         slotIndex = index;
     }
 
-    // 외부에서 이 슬롯의 인덱스를 가져와야 할 경우를 대비한 Getter (선택 사항)
+    /// <summary>
+    /// 외부에서 이 슬롯의 인덱스를 가져와야 할 경우를 대비한 Getter (선택 사항)
+    /// </summary>
+    /// <returns></returns>
     public int GetSlotIndex()
     {
         return slotIndex;
