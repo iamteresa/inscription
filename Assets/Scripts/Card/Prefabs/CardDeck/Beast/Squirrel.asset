@@ -16,7 +16,7 @@ MonoBehaviour:
   _species: 0
   _attack: 0
   _health: 1
-  _cardImage: {fileID: 21300000, guid: c42a08680c040da4bbf6f984d891cc07, type: 3}
+  _cardImage: {fileID: 21300000, guid: 69cec2cfe990dad4ab1477cb0955c5e4, type: 3}
   _cost: 0
   _cardSkillImage: {fileID: 0}
   _abilityType: 12
