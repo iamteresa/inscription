@@ -16,15 +16,18 @@ public class CardAbilityManager : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this.gameObject); // 이미 인스턴스가 있다면 현재 게임 오브젝트 파괴
-        }
-        else
-        {
-            Instance = this;                    // 현재 인스턴스를 싱글톤으로 설정
-            DontDestroyOnLoad(this.gameObject); // 씬 전환 시 파괴되지 않도록 설정 (선택 사항, 필요에 따라)
-        }
+        Instance = this;
+
+
+        //if (Instance != null && Instance != this)
+        //{
+        //    Destroy(this.gameObject); // 이미 인스턴스가 있다면 현재 게임 오브젝트 파괴
+        //}
+        //else
+        //{
+        //    Instance = this;                    // 현재 인스턴스를 싱글톤으로 설정
+        //    DontDestroyOnLoad(this.gameObject); // 씬 전환 시 파괴되지 않도록 설정 (선택 사항, 필요에 따라)
+        //}
     }
 
     /// <summary>
